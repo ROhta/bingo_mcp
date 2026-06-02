@@ -1,0 +1,3 @@
+[submodule "vendor/bingo"]
+	path = vendor/bingo
+	url = https://github.com/ROhta/bingo

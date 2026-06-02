@@ -7,6 +7,7 @@ import NumberList from "@vendor/bingo/numberList"
 
 let card: Card | null = null
 let numberList: NumberList | null = null
+let drawing = false // 抽選→同期の往復中フラグ（連打による並行抽選を抑止）
 
 const element = (id: string): HTMLElement => {
 	const found = document.getElementById(id)
@@ -64,20 +65,30 @@ app.ontoolresult = result => {
 }
 
 element("draw").addEventListener("click", async () => {
-	if (!numberList || !card) return
+	if (drawing || !numberList || !card) return
 	const drawn = drawNext(numberList)
 	if (drawn === null) {
 		setStatus("全て抽選済み")
 		return
 	}
+	drawing = true
 	card = markNumber(card, drawn)
 	element("latest").textContent = String(drawn)
 	render()
-	// 抽選結果をサーバーのチェックポイントへ同期（RNG はウィジェット側=ここが真実）
-	await app.callServerTool({
-		name: "sync_state",
-		arguments: {state: {remain: numberList.remainList, history: numberList.historyList, card}},
-	})
+	try {
+		// 抽選結果をサーバーのチェックポイントへ同期（RNG はウィジェット側=ここが真実）
+		await app.callServerTool({
+			name: "sync_state",
+			arguments: {state: {remain: numberList.remainList, history: numberList.historyList, card}},
+		})
+	} catch (error) {
+		// 同期失敗は黙殺しない。ローカルは1手進んでおりサーバーと乖離する点に注意:
+		// resume で stale state に巻き戻る設計上の緊張は Task 10/11 で扱う。
+		setStatus("同期に失敗しました（ローカルは進行済み・再抽選で再同期されます）")
+		console.error(error)
+	} finally {
+		drawing = false
+	}
 })
 
 app.connect()

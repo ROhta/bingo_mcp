@@ -5,7 +5,7 @@ import {readFile} from "node:fs/promises"
 import path from "node:path"
 import {fileURLToPath} from "node:url"
 import {z} from "zod"
-import {generateCard} from "../widget/card.js"
+import {freshGame} from "./game.js"
 import type {GameState} from "../shared/types.js"
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -13,12 +13,6 @@ const RESOURCE_URI = "ui://bingo/board"
 
 // 単一盤面ポリシー（設計書 §9）。stateful HTTP 化（複数セッション分離）は Task 11。
 let game: GameState | null = null
-
-const freshGame = (): GameState => ({
-	remain: Array.from({length: 75}, (_, i) => i + 1),
-	history: [],
-	card: generateCard(),
-})
 
 // GameState の zod スキーマ（raw shape は SDK が z.object() で自動ラップ）
 const cellSchema = z.object({value: z.union([z.number(), z.literal("FREE")]), marked: z.boolean()})

@@ -1,3 +1,5 @@
+// 相対 import は .js 付き: card.ts は server ビルド(tsc→Node ESM)のグラフに入るため
+// 実行時解決に拡張子が要る（widget 専用ファイルは esbuild が inline するため任意）。
 import {Card, Cell, COLUMN_RANGES, Judgement, Line} from "../shared/types.js"
 
 function pickFiveDistinct(min: number, max: number): number[] {

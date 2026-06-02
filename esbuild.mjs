@@ -18,7 +18,13 @@ const result = await esbuild.build({
 
 const bundle = result.outputFiles[0]
 if (!bundle) throw new Error("esbuild produced no output")
+// バンドル JS 内に "</script>" が現れると HTML パーサが script を早期終了するためエスケープ
+const safeScript = bundle.text.replace(/<\/script>/gi, "<\\/script>")
 const template = await readFile("src/widget/index.html", "utf-8")
 await mkdir("dist", {recursive: true})
-await writeFile("dist/mcp-app.html", template.replace("<!--BUNDLE-->", `<script>${bundle.text}</script>`))
+// XSS 非該当: safeScript はビルド時に生成する自前の esbuild バンドル（外部/ユーザー入力ではない）。
+// </script> はエスケープ済み。MCP App は自コードを単一HTMLに inline して ui:// で配信する仕様。
+// nosemgrep
+const html = template.replace("<!--BUNDLE-->", `<script>${safeScript}</script>`)
+await writeFile("dist/mcp-app.html", html)
 console.log("wrote dist/mcp-app.html")

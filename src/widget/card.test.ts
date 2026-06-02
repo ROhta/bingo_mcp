@@ -1,5 +1,5 @@
 import {describe, expect, test} from "vitest"
-import {generateCard, judge, lineCells, markNumber} from "./card"
+import {generateCard, isValidCard, judge, lineCells, markNumber} from "./card"
 import {COLUMN_RANGES, type Card} from "../shared/types"
 
 describe("generateCard", () => {
@@ -120,5 +120,20 @@ describe("judge", () => {
 describe("lineCells", () => {
 	test("diag1 は card[i][4-i] を返す", () => {
 		expect(lineCells(base(), {kind: "diag", index: 1}).map(c => c.value)).toEqual([5, 19, "FREE", 47, 61])
+	})
+})
+
+describe("isValidCard", () => {
+	test("正しい5×5カードを受理する", () => {
+		expect(isValidCard(generateCard())).toBe(true)
+		expect(isValidCard(base())).toBe(true)
+	})
+	test("形状不正を拒否する", () => {
+		expect(isValidCard(null)).toBe(false)
+		expect(isValidCard("x")).toBe(false)
+		expect(isValidCard([])).toBe(false)
+		expect(isValidCard(generateCard().slice(0, 4))).toBe(false) // 4列
+		expect(isValidCard([[{value: 1, marked: false}]])).toBe(false) // 列が短い
+		expect(isValidCard([[{value: 1}]])).toBe(false) // marked 欠落
 	})
 })

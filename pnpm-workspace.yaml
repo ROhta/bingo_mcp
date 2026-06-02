@@ -1,0 +1,4 @@
+# pnpm 11: 設定は package.json の "pnpm" フィールドではなくここに書く。
+# esbuild はネイティブバイナリ取得に postinstall が必要なため、ビルドを許可する。
+allowBuilds:
+  esbuild: true

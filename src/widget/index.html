@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ja">
+	<head>
+		<meta charset="utf-8" />
+		<title>Bingo</title>
+		<style>
+			body {
+				font-family: system-ui, sans-serif;
+				padding: 16px;
+			}
+			#board {
+				display: inline-block;
+			}
+			#board > div {
+				display: flex;
+			}
+			.cell {
+				width: 44px;
+				height: 44px;
+				margin: 2px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 6px;
+				background: #e2e8f0;
+				color: #1e293b;
+				font-weight: 600;
+			}
+			.cell.marked {
+				background: #16a34a;
+				color: #fff;
+			}
+			#latest {
+				font-size: 2.5rem;
+				font-weight: 700;
+				margin: 8px 0;
+				min-height: 2.5rem;
+			}
+			#status {
+				color: #64748b;
+				min-height: 1.2em;
+			}
+			button {
+				padding: 8px 16px;
+				font-size: 1rem;
+				border-radius: 6px;
+				cursor: pointer;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="board"></div>
+		<button id="draw">抽選</button>
+		<div id="latest"></div>
+		<div id="status"></div>
+		<!--BUNDLE-->
+	</body>
+</html>

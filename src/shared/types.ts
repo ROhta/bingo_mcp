@@ -23,8 +23,12 @@ export interface Judgement {
 	reachLines: Line[]
 }
 
-/** サーバーが保持する権威状態（平データ）。マークは Cell.marked が保持。 */
-export interface GameState {
+/**
+ * サーバーが保持する権威状態（平データ）。マークは Cell.marked が保持。
+ * interface ではなく type にしているのは、MCP SDK の structuredContent が要求する
+ * `{[x: string]: unknown}` への代入互換（暗黙の index signature）を得るため。
+ */
+export type GameState = {
 	remain: number[]
 	history: number[]
 	card: Card

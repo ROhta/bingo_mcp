@@ -18,8 +18,14 @@
 	"devDependencies": {
 		"@tsconfig/strictest": "^2.0.8",
 		"@types/node": "^25.9.1",
+		"esbuild": "^0.28.0",
 		"jsdom": "^29.1.1",
 		"typescript": "^6.0.3",
 		"vitest": "^4.1.7"
+	},
+	"dependencies": {
+		"@modelcontextprotocol/ext-apps": "^1.7.3",
+		"@modelcontextprotocol/sdk": "^1.29.0",
+		"zod": "^4.4.3"
 	}
 }

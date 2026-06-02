@@ -1,0 +1,25 @@
+{
+	"name": "bingo-mcp",
+	"version": "0.1.0",
+	"private": true,
+	"license": "GPL-3.0-or-later",
+	"type": "module",
+	"bin": {
+		"bingo-mcp": "dist/server/index.js"
+	},
+	"scripts": {
+		"build:widget": "node esbuild.mjs",
+		"build:server": "tsc -p tsconfig.server.json",
+		"build": "pnpm build:widget && pnpm build:server",
+		"typecheck": "tsc -p tsconfig.json",
+		"test": "vitest run",
+		"test:watch": "vitest"
+	},
+	"devDependencies": {
+		"@tsconfig/strictest": "^2.0.8",
+		"@types/node": "^25.9.1",
+		"jsdom": "^29.1.1",
+		"typescript": "^6.0.3",
+		"vitest": "^4.1.7"
+	}
+}

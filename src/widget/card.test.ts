@@ -1,5 +1,5 @@
 import {describe, expect, test} from "vitest"
-import {generateCard, judge, markNumber} from "./card"
+import {generateCard, judge, lineCells, markNumber} from "./card"
 import {COLUMN_RANGES, type Card} from "../shared/types"
 
 describe("generateCard", () => {
@@ -24,6 +24,9 @@ describe("generateCard", () => {
 		const card = generateCard()
 		expect(card[2]![2]!.value).toBe("FREE")
 		expect(card[2]![2]!.marked).toBe(true)
+	})
+	test("生成直後のマークは中央FREEの1個だけ", () => {
+		expect(generateCard().flat().filter(c => c.marked)).toHaveLength(1)
 	})
 })
 
@@ -92,5 +95,30 @@ describe("judge", () => {
 		// 行0 = [1,16,31,46,61] のうち列2(31)未マーク → 4マークでリーチ
 		for (const n of [1, 16, 46, 61]) card = markNumber(card, n)
 		expect(judge(card).reachLines).toContainEqual({kind: "row", index: 0})
+	})
+	test("新規カード(FREEのみ)はビンゴもリーチも無い", () => {
+		const {bingoLines, reachLines} = judge(base())
+		expect(bingoLines).toEqual([])
+		expect(reachLines).toEqual([])
+	})
+	test("3マークはリーチでもビンゴでもない", () => {
+		let card = base()
+		for (const n of [1, 16, 31]) card = markNumber(card, n) // 行0を3/5
+		const {bingoLines, reachLines} = judge(card)
+		expect(reachLines).not.toContainEqual({kind: "row", index: 0})
+		expect(bingoLines).toEqual([])
+	})
+	test("ビンゴ成立ラインは reachLines に含まれない（else if で排他）", () => {
+		let card = base()
+		for (const n of [3, 18, 48, 63]) card = markNumber(card, n) // 行2ビンゴ
+		const {bingoLines, reachLines} = judge(card)
+		expect(bingoLines).toContainEqual({kind: "row", index: 2})
+		expect(reachLines).not.toContainEqual({kind: "row", index: 2})
+	})
+})
+
+describe("lineCells", () => {
+	test("diag1 は card[i][4-i] を返す", () => {
+		expect(lineCells(base(), {kind: "diag", index: 1}).map(c => c.value)).toEqual([5, 19, "FREE", 47, 61])
 	})
 })

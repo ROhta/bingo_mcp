@@ -9,12 +9,14 @@ export interface Cell {
 export type Card = Cell[][]
 
 export type LineKind = "row" | "col" | "diag"
+export type RowColIndex = 0 | 1 | 2 | 3 | 4
+export type DiagIndex = 0 | 1
 
-/** row/col は index 0..4。diag は 0=左上→右下, 1=右上→左下。 */
-export interface Line {
-	kind: LineKind
-	index: number
-}
+/** row/col は index 0..4。diag は 0=左上→右下, 1=右上→左下。範囲を型で縛る。 */
+export type Line =
+	| {kind: "row"; index: RowColIndex}
+	| {kind: "col"; index: RowColIndex}
+	| {kind: "diag"; index: DiagIndex}
 
 export interface Judgement {
 	bingoLines: Line[]
@@ -28,11 +30,11 @@ export interface GameState {
 	card: Card
 }
 
-/** 列ごとの数値レンジ B/I/N/G/O */
-export const COLUMN_RANGES: readonly (readonly [number, number])[] = [
+/** 列ごとの数値レンジ B/I/N/G/O（長さ5を型で固定） */
+export const COLUMN_RANGES = [
 	[1, 15],
 	[16, 30],
 	[31, 45],
 	[46, 60],
 	[61, 75],
-]
+] as const satisfies readonly (readonly [number, number])[]

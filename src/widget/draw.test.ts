@@ -24,4 +24,12 @@ describe("draw", () => {
 		expect(nl.historyList).toHaveLength(75)
 		expect(drawNext(nl)).toBeNull()
 	})
+
+	test("1回引くと remain から消え history に入る", () => {
+		const nl = startDraw()
+		const n = drawNext(nl)!
+		expect(nl.remainList).toHaveLength(74)
+		expect(nl.historyList).toEqual([n])
+		expect(nl.remainList).not.toContain(n)
+	})
 })

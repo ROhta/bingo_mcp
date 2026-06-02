@@ -25,10 +25,10 @@ export function markNumber(card: Card, drawnNumber: number): Card {
 	return card.map(col => col.map(cell => (cell.value === drawnNumber ? {...cell, marked: true} : cell)))
 }
 
-/** 判定対象の全12ライン（5行 + 5列 + 2対角）。 */
+/** 判定対象の全12ライン（5行 + 5列 + 2対角）。index は型で 0..4 / 0|1 に縛られる。 */
 const ALL_LINES: Line[] = [
-	...[0, 1, 2, 3, 4].map(index => ({kind: "row" as const, index})),
-	...[0, 1, 2, 3, 4].map(index => ({kind: "col" as const, index})),
+	...([0, 1, 2, 3, 4] as const).map(index => ({kind: "row" as const, index})),
+	...([0, 1, 2, 3, 4] as const).map(index => ({kind: "col" as const, index})),
 	{kind: "diag" as const, index: 0},
 	{kind: "diag" as const, index: 1},
 ]

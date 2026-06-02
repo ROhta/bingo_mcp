@@ -1,4 +1,6 @@
-import {Card, Cell, COLUMN_RANGES, Judgement, Line} from "../shared/types"
+// 相対 import は .js 付き: card.ts は server ビルド(tsc→Node ESM)のグラフに入るため
+// 実行時解決に拡張子が要る（widget 専用ファイルは esbuild が inline するため任意）。
+import {Card, Cell, COLUMN_RANGES, Judgement, Line} from "../shared/types.js"
 
 function pickFiveDistinct(min: number, max: number): number[] {
 	const pool = Array.from({length: max - min + 1}, (_, i) => min + i)
@@ -54,4 +56,25 @@ export function judge(card: Card): Judgement {
 		else if (markedCount === 4) reachLines.push(line)
 	}
 	return {bingoLines, reachLines}
+}
+
+/**
+ * 信頼境界の検証: 値が 5×5 の Card 形状か（不正な server state で judge/lineCells が crash しないように）。
+ * Task 8: ウィジェットが server の state.card を受領する箇所で使う。
+ */
+export function isValidCard(value: unknown): value is Card {
+	return (
+		Array.isArray(value) &&
+		value.length === 5 &&
+		value.every(
+			col =>
+				Array.isArray(col) &&
+				col.length === 5 &&
+				col.every(cell => {
+					if (typeof cell !== "object" || cell === null) return false
+					const candidate = cell as {value?: unknown; marked?: unknown}
+					return (typeof candidate.value === "number" || candidate.value === "FREE") && typeof candidate.marked === "boolean"
+				}),
+		)
+	)
 }

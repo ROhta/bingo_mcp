@@ -24,7 +24,9 @@ const template = await readFile("src/widget/index.html", "utf-8")
 await mkdir("dist", {recursive: true})
 // XSS 非該当: safeScript はビルド時に生成する自前の esbuild バンドル（外部/ユーザー入力ではない）。
 // </script> はエスケープ済み。MCP App は自コードを単一HTMLに inline して ui:// で配信する仕様。
+// 置換は「関数」で渡すこと: 文字列置換だと replacement 内の $&/$$/$` 等が特殊パターンと
+// 解釈され、バンドル中の正規表現エスケープ("\\$&" 等)が破損する（実害: 実行時に壊れる）。
 // nosemgrep
-const html = template.replace("<!--BUNDLE-->", `<script>${safeScript}</script>`)
+const html = template.replace("<!--BUNDLE-->", () => `<script>${safeScript}</script>`)
 await writeFile("dist/mcp-app.html", html)
 console.log("wrote dist/mcp-app.html")

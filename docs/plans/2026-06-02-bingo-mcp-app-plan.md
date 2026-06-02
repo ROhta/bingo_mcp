@@ -47,13 +47,13 @@
 Run:
 ```bash
 git clone https://github.com/modelcontextprotocol/ext-apps.git /tmp/ext-apps
-cd /tmp/ext-apps/examples/basic-host && cat package.json
+ls /tmp/ext-apps/examples/   # 実在する例を確認
 ```
-Expected: `examples/basic-host` と `examples/get-time`（等）が存在する。
+Expected: `examples/basic-server-vanillajs`（最小確認用）と `examples/budget-allocator-server`（structuredContent/outputSchema の実例）等が存在する。
 
 - [ ] **Step 2: hello widget をレンダリングする最小サーバーを作る**
 
-`examples/get-time` を雛形に、`registerAppResource`/`registerAppTool` で `ui://hello/board` を返す最小サーバーを `spike/` に作成し、basic-host で iframe 描画されることを確認。
+`examples/basic-server-vanillajs` を雛形に、`registerAppResource`/`registerAppTool` で `ui://hello/board` を返す最小サーバーを `spike/` に作成し、付属のテストホスト（または MCP Inspector）で iframe 描画されることを確認。
 
 - [ ] **Step 3: 4つの能力を確認し記録する**
 
@@ -107,8 +107,9 @@ Expected: `export default class NumberList {` が見える。
   "bin": { "bingo-mcp": "dist/server/index.js" },
   "scripts": {
     "build:widget": "node esbuild.mjs",
-    "build:server": "tsc -p tsconfig.json",
+    "build:server": "tsc -p tsconfig.server.json",
     "build": "pnpm build:widget && pnpm build:server",
+    "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest"
   }
@@ -124,8 +125,9 @@ pnpm add -D typescript esbuild vitest jsdom zod @types/node
 ```
 Expected: `node_modules/@modelcontextprotocol/ext-apps/server` が存在する。
 
-- [ ] **Step 4: `tsconfig.json` を作成**
+- [ ] **Step 4: tsconfig を2つ作成（型検査用ベース＋サーバー出力用）**
 
+`tsconfig.json`（全体の型検査用。`noEmit:true` のため vendor の .ts を含めても rootDir 制約に当たらない）:
 ```json
 {
   "compilerOptions": {
@@ -135,8 +137,7 @@ Expected: `node_modules/@modelcontextprotocol/ext-apps/server` が存在する�
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "outDir": "dist",
-    "rootDir": "src",
+    "noEmit": true,
     "paths": { "@vendor/bingo/numberList": ["vendor/bingo/src/ts/numberList.ts"] },
     "baseUrl": "."
   },
@@ -144,10 +145,21 @@ Expected: `node_modules/@modelcontextprotocol/ext-apps/server` が存在する�
 }
 ```
 
+`tsconfig.server.json`（サーバーのみ出力。vendor を import する widget の .ts を含めないため TS6059 を回避）:
+```json
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "noEmit": false, "outDir": "dist", "rootDir": "src" },
+  "include": ["src/server/**/*.ts", "src/shared/**/*.ts", "src/widget/card.ts"]
+}
+```
+
+> server が widget から参照するのは vendor 非依存の `card.ts` のみなので include に含める。`draw.ts`/`main.ts`/`hydrate.ts`（vendor/DOM 依存）は esbuild がバンドルし、型検査は `pnpm typecheck`（ベース tsconfig・noEmit）が担う。これで `rootDir:"src"` を保ったまま（＝`dist/server/index.js` の出力位置と実行時 `../../dist/mcp-app.html` パスを壊さず）ビルドできる。
+
 - [ ] **Step 5: Commit**
 
 ```bash
-git add .gitmodules vendor/bingo package.json tsconfig.json pnpm-lock.yaml
+git add .gitmodules vendor/bingo package.json tsconfig.json tsconfig.server.json pnpm-lock.yaml
 git commit -m "chore: scaffold project with bingo submodule and deps"
 ```
 
@@ -342,7 +354,8 @@ describe("markNumber", () => {
     const card = base()
     const marked = markNumber(card, 1)
     expect(marked[0][0].marked).toBe(true)
-    expect(card[0][0].marked).toBe(false) // immutability
+    expect(card[0][0].marked).toBe(false) // 元カードは不変
+    expect(marked[0][0]).not.toBe(card[0][0]) // セルオブジェクトも非共有
   })
   test("存在しない値は何も変えない", () => {
     const card = base()
@@ -353,15 +366,40 @@ describe("markNumber", () => {
 describe("judge", () => {
   test("行が全マークでビンゴ（FREE含む中央行）", () => {
     let card = base()
-    for (const n of [31, 32, 34, 35]) card = markNumber(card, n) // 列0..4の row2、中央はFREE
+    // 行2 = 各列の row=2: card[0][2]=3, card[1][2]=18, FREE, card[3][2]=48, card[4][2]=63
+    for (const n of [3, 18, 48, 63]) card = markNumber(card, n)
+    expect(judge(card).bingoLines).toContainEqual({ kind: "row", index: 2 })
+  })
+  test("列が全マークでビンゴ（FREE含む中央列）", () => {
+    let card = base()
+    // 列2(N) = card[2]: [31,32,FREE,34,35]
+    for (const n of [31, 32, 34, 35]) card = markNumber(card, n)
+    expect(judge(card).bingoLines).toContainEqual({ kind: "col", index: 2 })
+  })
+  test("対角0（左上→右下）が全マークでビンゴ", () => {
+    let card = base()
+    // card[0][0]=1, card[1][1]=17, FREE, card[3][3]=49, card[4][4]=65
+    for (const n of [1, 17, 49, 65]) card = markNumber(card, n)
+    expect(judge(card).bingoLines).toContainEqual({ kind: "diag", index: 0 })
+  })
+  test("対角1（右上→左下）が全マークでビンゴ", () => {
+    let card = base()
+    // card[0][4]=5, card[1][3]=19, FREE, card[3][1]=47, card[4][0]=61
+    for (const n of [5, 19, 47, 61]) card = markNumber(card, n)
+    expect(judge(card).bingoLines).toContainEqual({ kind: "diag", index: 1 })
+  })
+  test("複数ライン同時成立を全て返す", () => {
+    let card = base()
+    for (const n of [3, 18, 48, 63, 31, 32, 34, 35]) card = markNumber(card, n)
     const { bingoLines } = judge(card)
     expect(bingoLines).toContainEqual({ kind: "row", index: 2 })
+    expect(bingoLines).toContainEqual({ kind: "col", index: 2 })
   })
   test("あと1つでリーチ", () => {
     let card = base()
-    for (const n of [1, 16, 46, 61]) card = markNumber(card, n) // row0 のうち列2(31)未マーク
-    const { reachLines } = judge(card)
-    expect(reachLines).toContainEqual({ kind: "row", index: 0 })
+    // 行0 = [1,16,31,46,61] のうち列2(31)未マーク → 4マークでリーチ
+    for (const n of [1, 16, 46, 61]) card = markNumber(card, n)
+    expect(judge(card).reachLines).toContainEqual({ kind: "row", index: 0 })
   })
 })
 ```
@@ -445,6 +483,10 @@ describe("hydrate", () => {
     seedLocalStorage({ remain: [5], history: [] })
     expect(JSON.parse(localStorage.getItem("remainNumberList")!)).toEqual([5])
     expect(JSON.parse(localStorage.getItem("historyNumberList")!)).toEqual([])
+  })
+  test("空のときデフォルト({remain:[],history:[]})を返す", () => {
+    localStorage.clear()
+    expect(readDrawState()).toEqual({ remain: [], history: [] })
   })
 })
 ```
@@ -657,12 +699,18 @@ render()
 ```js
 import * as esbuild from "esbuild"
 import { mkdir, readFile, writeFile } from "node:fs/promises"
+import { fileURLToPath } from "node:url"
 
 const result = await esbuild.build({
   entryPoints: ["src/widget/main.ts"],
   bundle: true, format: "iife", target: "es2022", write: false,
   loader: { ".mp3": "dataurl" },
-  alias: { "@vendor/bingo/numberList": "./vendor/bingo/src/ts/numberList.ts" },
+  // 相対 alias は cwd 依存になるため絶対パス化（vitest.config.ts と同方式）
+  alias: {
+    "@vendor/bingo/numberList": fileURLToPath(
+      new URL("./vendor/bingo/src/ts/numberList.ts", import.meta.url),
+    ),
+  },
 })
 const js = result.outputFiles[0].text
 const template = await readFile("src/widget/index.html", "utf-8")
@@ -709,6 +757,17 @@ const freshGame = (): GameState => ({
   remain: Array.from({ length: 75 }, (_, i) => i + 1), history: [], card: generateCard(),
 })
 
+// GameState の zod スキーマ（raw shape は SDK が z.object() で自動ラップ）
+const cellSchema = z.object({
+  value: z.union([z.number(), z.literal("FREE")]),
+  marked: z.boolean(),
+})
+const gameStateShape = {
+  remain: z.array(z.number()),
+  history: z.array(z.number()),
+  card: z.array(z.array(cellSchema)),
+}
+
 const server = new McpServer({ name: "bingo-mcp", version: "0.1.0" })
 
 registerAppResource(server, RESOURCE_URI, RESOURCE_URI, { mimeType: RESOURCE_MIME_TYPE }, async () => {
@@ -720,6 +779,7 @@ registerAppTool(server, "start_bingo", {
   title: "ビンゴを開始",
   description: "ビンゴ盤面を開く。既存があれば再開、無ければ新規。",
   inputSchema: { mode: z.enum(["resume", "fresh"]).optional() },
+  outputSchema: gameStateShape,
   _meta: { ui: { resourceUri: RESOURCE_URI } },
 }, async ({ mode }) => {
   if (mode === "fresh" || game === null) game = freshGame()
@@ -729,7 +789,8 @@ registerAppTool(server, "start_bingo", {
 registerAppTool(server, "sync_state", {
   title: "状態同期",
   description: "ウィジェットからゲーム状態を保存する。",
-  inputSchema: { state: z.any() },
+  inputSchema: { state: z.object(gameStateShape) },
+  outputSchema: gameStateShape,
   _meta: { ui: { resourceUri: RESOURCE_URI } },
 }, async ({ state }) => {
   game = state as GameState
@@ -803,7 +864,7 @@ git commit -m "feat: add chat-driven draw, reset, audio and narration"
 
 - [ ] **Step 1: HTTP トランスポートを追加**
 
-`@modelcontextprotocol/sdk` の Streamable HTTP サーバートランスポートで `/mcp` を公開。起動引数 `--http` で stdio と切替（ロジック・ツール・リソースは共通）。
+`@modelcontextprotocol/sdk` の `StreamableHTTPServerTransport` で `/mcp` を公開。起動引数 `--http` で stdio と切替（ロジック・ツール・リソースは共通）。**ステートフルモード**（`sessionIdGenerator` を設定し `Mcp-Session-Id` ヘッダでセッション識別、サーバーインスタンスを保持）を採用する — 公式の最小例はステートレス（`sessionIdGenerator: undefined`）で、その形では Step 2 の `Map<sessionId, GameState>` が成立しないため。
 
 - [ ] **Step 2: セッション分離**
 
@@ -827,3 +888,13 @@ git commit -m "feat: add Streamable HTTP transport with per-session state"
 - **Spec coverage**: 抽選機再現(Task7)/カード判定(Task4,5)/忠実な再利用=submodule＋NumberList(Task1,7)/C案状態権威(Task9 server checkpoint＋Task8 hydrate)/mimeType(Task9 `RESOURCE_MIME_TYPE`)/mp3 inline(Task10)/Phase0スパイク(Task0)/両対応(Task9 stdio・Task11 HTTP)/単一盤面(Task9)/枯渇(Task7 `null`) — 設計書の各節に対応タスクあり。
 - **型整合**: `GameState{remain,history,card}`（設計書の重複していた `marks` は `Cell.marked` に統合）、`Card=Cell[][]`(列優先)、`judge(card)→{bingoLines,reachLines}`、`drawNext()→number|null`、`markNumber(card,n)` — 全タスクで一貫。
 - **不確実API**: ext-apps の `ontoolresult`/`structuredContent` フィールド名・`inputSchema` 記法・モデルコンテキスト送信 API・`draw_number` の host→widget 経路は **Task0(Phase0)で確定**し、Task9/10 はその確定値で実装する旨を明記（推測で固定しない）。
+
+## PR #2 レビュー反映（2エージェント独立レビュー＋SDK一次確認）
+
+- **C-1**: Task5 行ビンゴテストのマーク値を列2値`[31,32,34,35]`→行2値`[3,18,48,63]`に修正。列/対角0/対角1/複数ライン同時のテストを追加（全値検算済み）。
+- **C-2**: `tsconfig.json`(noEmit・型検査用)と`tsconfig.server.json`(出力用・widget除外)に分離し TS6059 を回避。`typecheck` スクリプト追加。
+- **I-1**: `start_bingo`/`sync_state` に `outputSchema`(GameState zod)を付与、`sync_state` 入力を `z.any()`→`z.object(gameStateShape)` に厳格化。
+- **I-2**: Task0 参照例を `basic-server-vanillajs`/`budget-allocator-server`(実在)へ修正。
+- **I-3**: Task11 を `StreamableHTTPServerTransport` ステートフル(`sessionIdGenerator`設定・`Mcp-Session-Id`)へ明記。
+- **I-4**: esbuild alias を `fileURLToPath` で絶対パス化。
+- **I-5**: 設計書 §9b/§9/§4 を本計画のAPI(`markNumber`/`judge(card)`/`GameState`に`marks`なし)へ追従更新。

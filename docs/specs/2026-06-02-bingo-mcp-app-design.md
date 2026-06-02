@@ -85,7 +85,7 @@ Claude のグラフィカルクライアント（claude.ai web / Claude Desktop�
                     ▼           │
         ┌─ MCP server (薄型 / stdio・HTTP両対応) ─────┐
         │ state: Map<sessionId, GameState> (平データ・in-memory) │
-        │   GameState = {remain[], history[], card, marks}     │
+        │   GameState = {remain[], history[], card}            │
         │ resource: ui://bingo/board (widget バンドル)          │
         │ tools: start_bingo / draw_number / sync_state /       │
         │        reset_game                                     │
@@ -168,7 +168,7 @@ bingo_mcp/
 
 ## 9. 状態管理と永続化（C案・詳細）
 
-- **権威**: サーバーの `Map<sessionId, GameState>`（in-memory・平データ）。`GameState = {remain:number[], history:number[], card:Card, marks:boolean[][]}`。
+- **権威**: サーバーの `Map<sessionId, GameState>`（in-memory・平データ）。`GameState = {remain:number[], history:number[], card:Card}`（マーク状態は `Card` の各 `Cell.marked` が保持。別途 `marks[][]` は持たない）。
 - **ウィジェット**: 各 render で受領した state から `localStorage`（`remainNumberList`/`historyNumberList`）を**再シード**し、`NumberList` を resume。抽選/マーク後の新 state を `sync_state` でサーバーへ返す。
 - **セッション内 vs ターン跨ぎ**: `localStorage` は `allow-same-origin` 前提でセッション内はネイティブ動作。ただし View は毎ターン破棄され得るため**ターン跨ぎ生存は localStorage に依存しない**。跨ぎの真実は常にサーバーのチェックポイント。
 - **単一盤面ポリシー**（C-4 対応）: 1 セッション 1 盤面のみ。`start_bingo` 再実行は既定で **resume**（既存チェックポイントを引き継ぐ）。複数同時盤面はスコープ外（§14）。これにより固定 localStorage キーの衝突は「サーバー state がマスター・localStorage は使い捨てキャッシュ」の関係で吸収する。
@@ -183,9 +183,9 @@ type Cell = { value: number | "FREE"; marked: boolean }
 type Card = Cell[][]            // 5列 × 5行
 type Line = { kind: "row"｜"col"｜"diag"; index: number }
 
-function generateCard(): Card           // 各列レンジから重複なく 5 個、中央 FREE
-function mark(card: Card, n: number): Card   // 抽選番号でマーク（該当セルがあれば marked=true）
-function judge(card: Card, drawn: number[]):
+function generateCard(): Card                 // 各列レンジから重複なく 5 個、中央 FREE(初期 marked)
+function markNumber(card: Card, n: number): Card  // 抽選番号でマーク（該当セルがあれば marked=true、不変更新）
+function judge(card: Card):                   // マーク状態のみで判定（drawn 引数は不要）
   { bingoLines: Line[]; reachLines: Line[] }  // ビンゴ=1ライン全マーク / リーチ=あと1つで成立
 ```
 

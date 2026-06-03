@@ -8,8 +8,8 @@ import drumrollSound from "../../vendor/bingo/src/materials/drumroll.mp3"
 import cymbalsSound from "../../vendor/bingo/src/materials/cymbals.mp3"
 
 // チャット抽選の「溜め」時間（ドラムロール→数字公開）。
-// レスポンス待ち中は鳴らす widget が未マウントで不可のため、widget 描画後に 2.5 秒確保する。
-const REVEAL_DELAY_MS = 2500
+// レスポンス待ち中は鳴らす widget が未マウントで不可のため、widget 描画後に 2 秒確保する。
+const REVEAL_DELAY_MS = 2000
 
 let card: Card | null = null
 let numberList: NumberList | null = null

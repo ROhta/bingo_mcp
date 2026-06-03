@@ -35,9 +35,16 @@
 				font-weight: 700;
 				margin: 8px 0;
 				min-height: 2.5rem;
+				/* ホストのテーマ(ライト/ダーク)が不定なので、白文字＋濃い縁取りで
+				   どんな背景でも読めるようにする（ダークモードで黒く潰れる問題対策）。 */
+				color: #fff;
+				text-shadow:
+					0 0 3px #000,
+					0 0 3px #000,
+					0 1px 2px #000;
 			}
 			#status {
-				color: #64748b;
+				color: #94a3b8;
 				min-height: 1.2em;
 			}
 			button {

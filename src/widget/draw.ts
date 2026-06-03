@@ -1,12 +1,5 @@
 import NumberList from "@vendor/bingo/numberList"
 
-/** 新規ゲームの NumberList を返す（remain=[1..75], history=[]）。 */
-export function startDraw(): NumberList {
-	const numberList = new NumberList()
-	numberList.resetLists()
-	return numberList
-}
-
 /** 残りから1つ抽選して history へ移し、抽選番号を返す。残りが無ければ null。 */
 export function drawNext(numberList: NumberList): number | null {
 	const remain = numberList.remainList

@@ -1,6 +1,13 @@
 import {describe, expect, test} from "vitest"
-import {generateCard, isValidCard, judge, lineCells, markNumber} from "./card"
+import {generateCard, isValidCard, judge, lineCells, markNumber, randomIndex} from "./card"
 import {COLUMN_RANGES, type Card} from "../shared/types"
+
+describe("randomIndex", () => {
+	test("maxExclusive=1 は常に 0（floor で上端 maxExclusive に達しない契約）", () => {
+		// Math.round/ceil への退行を確定的に検出（round なら ~40% で 1 を返し落ちる）
+		for (let i = 0; i < 100; i++) expect(randomIndex(1)).toBe(0)
+	})
+})
 
 describe("generateCard", () => {
 	test("5列×5行で生成される", () => {

@@ -183,7 +183,7 @@ element("draw").addEventListener("click", async () => {
 
 	// rolling → 停止して抽選確定・公開
 	phase = "idle"
-	setButtonLabel("抽選")
+	setButtonLabel("START")
 	stopDrumroll()
 	const drawn = drawNext(numberList)
 	if (drawn === null) {

@@ -4,9 +4,15 @@
 		<meta charset="utf-8" />
 		<title>Bingo</title>
 		<style>
+			/* ホストのテーマ(ライト/ダーク)に追従する。既定はライト、dark は media query で上書き。 */
+			:root {
+				color-scheme: light dark;
+			}
 			body {
 				font-family: system-ui, sans-serif;
 				padding: 16px;
+				background: #ffffff;
+				color: #1a1a1a;
 			}
 			#board {
 				display: inline-block;
@@ -28,30 +34,43 @@
 			}
 			.cell.marked {
 				background: #16a34a;
-				color: #fff;
+				color: #ffffff;
 			}
 			#latest {
 				font-size: 2.5rem;
 				font-weight: 700;
 				margin: 8px 0;
 				min-height: 2.5rem;
-				/* ホストのテーマ(ライト/ダーク)が不定なので、白文字＋濃い縁取りで
-				   どんな背景でも読めるようにする（ダークモードで黒く潰れる問題対策）。 */
-				color: #fff;
-				text-shadow:
-					0 0 3px #000,
-					0 0 3px #000,
-					0 1px 2px #000;
+				color: inherit; /* 背景に合わせて文字色が変わる(白背景=濃色 / 黒背景=白) */
 			}
 			#status {
-				color: #94a3b8;
 				min-height: 1.2em;
+				color: inherit;
+				opacity: 0.65;
 			}
 			button {
 				padding: 8px 16px;
 				font-size: 1rem;
 				border-radius: 6px;
 				cursor: pointer;
+				background: #e2e8f0;
+				color: #1e293b;
+				border: 1px solid rgba(128, 128, 128, 0.35);
+			}
+
+			@media (prefers-color-scheme: dark) {
+				body {
+					background: #1a1a1a;
+					color: #f5f5f5;
+				}
+				.cell {
+					background: #334155;
+					color: #f1f5f9;
+				}
+				button {
+					background: #334155;
+					color: #f1f5f9;
+				}
 			}
 		</style>
 	</head>

@@ -8,7 +8,6 @@ export interface Cell {
 /** 列優先 card[column][row]。列は B,I,N,G,O。5列×5行。 */
 export type Card = Cell[][]
 
-export type LineKind = "row" | "col" | "diag"
 export type RowColIndex = 0 | 1 | 2 | 3 | 4
 export type DiagIndex = 0 | 1
 

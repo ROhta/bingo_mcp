@@ -27,15 +27,3 @@ export function seedLocalStorage(state: DrawState): void {
 	localStorage.setItem(REMAIN_KEY, JSON.stringify(assertBingoNumbers("remain", state.remain)))
 	localStorage.setItem(HISTORY_KEY, JSON.stringify(assertBingoNumbers("history", state.history)))
 }
-
-/**
- * 現在の localStorage から remain/history を読み出す（不正値・非配列は throw）= 厳格な読み取り口。
- * 注(Task 8): 実運用の resume 読み取りを本関数経由にするか、vendored NumberList の getter
- *   （非配列で黙って [] に縮退する緩い読み手）に委ねるかを明示的に決めること。現状ホットパスは後者。
- */
-export function readDrawState(): DrawState {
-	return {
-		remain: assertBingoNumbers("remain", JSON.parse(localStorage.getItem(REMAIN_KEY) ?? "[]")),
-		history: assertBingoNumbers("history", JSON.parse(localStorage.getItem(HISTORY_KEY) ?? "[]")),
-	}
-}

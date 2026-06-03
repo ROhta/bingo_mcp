@@ -1,5 +1,5 @@
-import {generateCard, markNumber} from "../widget/card.js"
-import type {GameState} from "../shared/types.js"
+import {generateCard, judge, markNumber} from "../widget/card.js"
+import type {Card, GameState} from "../shared/types.js"
 
 /** 新規ゲームの初期状態（remain=1..75, history=空, 新しい5×5カード）。 */
 export function freshGame(): GameState {
@@ -26,4 +26,17 @@ export function drawFromState(game: GameState): GameState {
 		history: [...game.history, drawn],
 		card: markNumber(game.card, drawn),
 	}
+}
+
+/**
+ * 抽選結果をモデルがそのまま伝えられる文章にする（draw_number の戻りテキスト用）。
+ * カードのヒット/ミスを明示し、ヒット時は「自動マーク済み」と伝えることで、
+ * モデルが「タップしてマークして」と誤案内するのを防ぐ。card は markNumber 適用後を渡す。
+ */
+export function describeDraw(card: Card, drawn: number): string {
+	const onCard = card.some(column => column.some(cell => cell.value === drawn))
+	if (!onCard) return `${drawn} を抽選。カードにはありませんでした。`
+	const {bingoLines, reachLines} = judge(card)
+	const status = bingoLines.length ? " 🎉 ビンゴ！" : reachLines.length ? ` リーチ ${reachLines.length}！` : ""
+	return `${drawn} を抽選。カードにあったので自動でマークしました。${status}`
 }

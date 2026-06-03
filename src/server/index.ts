@@ -5,8 +5,7 @@ import {readFile} from "node:fs/promises"
 import path from "node:path"
 import {fileURLToPath} from "node:url"
 import {z} from "zod"
-import {drawFromState, freshGame} from "./game.js"
-import {judge} from "../widget/card.js"
+import {describeDraw, drawFromState, freshGame} from "./game.js"
 import type {GameState} from "../shared/types.js"
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -87,7 +86,8 @@ registerAppTool(
 	"draw_number",
 	{
 		title: "番号を抽選",
-		description: "次の番号を1つ抽選する（チャットからの「次引いて」用）。",
+		description:
+			"次の番号を1つ抽選する（チャットからの「次引いて」用）。引いた番号はカードにあれば自動でマークされる。ユーザーにタップを促さず、戻り文（カードにあったか・リーチ/ビンゴ）をそのまま伝えること。",
 		inputSchema: {},
 		outputSchema: gameStateShape,
 		_meta: {ui: {resourceUri: RESOURCE_URI}},
@@ -99,10 +99,8 @@ registerAppTool(
 		}
 		const current = drawFromState(before)
 		game = current
-		const latest = current.history.at(-1)
-		const {bingoLines, reachLines} = judge(current.card)
-		const note = bingoLines.length ? " ビンゴ！" : reachLines.length ? ` リーチ ${reachLines.length}` : ""
-		return {content: [{type: "text", text: `${latest} を抽選。${note}`.trim()}], structuredContent: current}
+		const drawn = current.history.at(-1)!
+		return {content: [{type: "text", text: describeDraw(current.card, drawn)}], structuredContent: current}
 	},
 )
 

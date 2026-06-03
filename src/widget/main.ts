@@ -7,26 +7,48 @@ import NumberList from "@vendor/bingo/numberList"
 import drumrollSound from "../../vendor/bingo/src/materials/drumroll.mp3"
 import cymbalsSound from "../../vendor/bingo/src/materials/cymbals.mp3"
 
+// チャット抽選の「溜め」時間（ドラムロール→数字公開）
+const REVEAL_DELAY_MS = 900
+
 let card: Card | null = null
 let numberList: NumberList | null = null
-let drawing = false // 抽選→同期の往復中フラグ（連打抑止）
-let lastHistoryLength = 0
-let initialized = false // 初回描画(起動/resume)では演出を鳴らさない
+let phase: "idle" | "rolling" = "idle" // ボタンの start/stop 状態
+let suspending = false // チャット抽選の溜め演出中（ボタン操作を抑止）
+let drumroll: HTMLAudioElement | null = null
+let initialized = false // この widget インスタンスで初回の状態適用か
 
 const element = (id: string): HTMLElement => {
 	const found = document.getElementById(id)
 	if (!found) throw new Error(`missing element #${id}`)
 	return found
 }
-
 const setStatus = (text: string): void => {
 	element("status").textContent = text
 }
+const setLatest = (text: string): void => {
+	element("latest").textContent = text
+}
+const setButtonLabel = (text: string): void => {
+	element("draw").textContent = text
+}
 
-function playSound(dataUrl: string): void {
-	// play() は失敗時に同期 throw でなく Promise を reject する（自動再生制限/CSP 等）。
-	// 未処理 rejection を避けるため必ず .catch() で握る。演出失敗はゲーム進行に影響させない。
-	void new Audio(dataUrl).play().catch(() => {})
+// ドラムロール = 抽選中の「溜め」。ループ再生し、任意に停止できるようインスタンスを保持。
+function startDrumroll(): void {
+	stopDrumroll()
+	const audio = new Audio(drumrollSound)
+	audio.loop = true
+	drumroll = audio
+	void audio.play().catch(() => {})
+}
+function stopDrumroll(): void {
+	if (drumroll) {
+		drumroll.pause()
+		drumroll = null
+	}
+}
+// シンバル = 数字が公開された瞬間（毎回）
+function playCymbals(): void {
+	void new Audio(cymbalsSound).play().catch(() => {})
 }
 
 function renderBoard(): void {
@@ -45,67 +67,125 @@ function renderBoard(): void {
 	}
 }
 
-/**
- * サーバー/ローカル双方の GameState を反映する単一経路。
- * - card 形状検証＋hydrate throw 捕捉（不正 state で render を殺さない）
- * - history が伸びた時だけ演出（drumroll / ビンゴ時 cymbals）。echo 再描画では鳴らさない。
- */
-function applyState(state: GameState): void {
+function updateStatus(): void {
+	if (!card) return
+	const {bingoLines, reachLines} = judge(card)
+	setStatus(bingoLines.length ? "ビンゴ！" : reachLines.length ? `リーチ ${reachLines.length}` : "")
+}
+
+/** state を盤面へ反映（演出なし）。localStorage 再シード＋NumberList 再生成。成否を返す。 */
+function applyBoardState(state: GameState): boolean {
 	if (!isValidCard(state.card)) {
 		setStatus("盤面データが不正です")
-		return
+		return false
 	}
 	try {
 		seedLocalStorage({remain: state.remain, history: state.history})
 	} catch (error) {
 		setStatus("ゲーム状態の復元に失敗しました")
 		console.error(error)
-		return
+		return false
 	}
-	const grew = initialized && state.history.length > lastHistoryLength
-	lastHistoryLength = state.history.length
-	initialized = true
 	card = state.card
 	numberList = new NumberList()
-	const {bingoLines, reachLines} = judge(card)
-	setStatus(bingoLines.length ? "ビンゴ！" : reachLines.length ? `リーチ ${reachLines.length}` : "")
-	// history が空(fresh/reset)なら前回の番号が残らないよう明示的にクリアする
-	const latest = state.history.at(-1)
-	element("latest").textContent = latest !== undefined ? String(latest) : ""
 	renderBoard()
-	if (grew) playSound(bingoLines.length ? cymbalsSound : drumrollSound)
+	updateStatus()
+	return true
+}
+
+/** 最新番号のマークを伏せたカード（リビール前の溜め表示用）。 */
+function withLatestUnmarked(source: Card, latest: number): Card {
+	return source.map(column => column.map(cell => (cell.value === latest ? {...cell, marked: false} : cell)))
+}
+
+/** チャット抽選結果の widget: 溜め(ドラムロール)→数字公開(シンバル) の演出付きで反映。 */
+function revealWithSuspense(state: GameState): void {
+	const latest = state.history.at(-1)
+	if (latest === undefined || !isValidCard(state.card)) {
+		applyBoardState(state)
+		setLatest("")
+		return
+	}
+	suspending = true
+	// 溜め: 数字を「？」・最新マークを伏せて表示し、ドラムロールを鳴らす
+	card = withLatestUnmarked(state.card, latest)
+	try {
+		seedLocalStorage({remain: state.remain, history: state.history})
+	} catch (error) {
+		console.error(error)
+	}
+	numberList = new NumberList()
+	renderBoard()
+	setStatus("")
+	setLatest("？")
+	startDrumroll()
+	window.setTimeout(() => {
+		stopDrumroll()
+		applyBoardState(state) // 本来の(マーク済み)状態へ
+		setLatest(String(latest))
+		playCymbals()
+		suspending = false
+	}, REVEAL_DELAY_MS)
 }
 
 const app = new App({name: "Bingo", version: "0.1.0"})
 
-// start_bingo / sync_state / reset_game / draw_number の structuredContent を反映
 app.ontoolresult = result => {
 	const state = result.structuredContent as GameState | undefined
-	if (state) applyState(state)
+	if (!state) return
+	const firstMount = !initialized
+	initialized = true
+	// チャット「次引いて」(draw_number)で新規描画された widget は、履歴ありで初回マウント
+	// → 溜め演出付きで公開。start_bingo(fresh)/reset/sync echo は演出なし。
+	if (firstMount && state.history.length > 0 && phase === "idle") {
+		revealWithSuspense(state)
+		return
+	}
+	if (applyBoardState(state)) {
+		const latest = state.history.at(-1)
+		setLatest(latest !== undefined ? String(latest) : "")
+	}
 }
 
-// ウィジェットのボタンは NumberList でローカル抽選（＝忠実な再利用の主経路）→ サーバーへ同期
+// ボタンは本家式 start/stop: 押す→ドラムロール(溜め)継続、もう一度→停止＆数字公開(シンバル)
 element("draw").addEventListener("click", async () => {
-	if (drawing || !numberList || !card) return
+	if (suspending || !numberList || !card) return
+
+	if (phase === "idle") {
+		if (numberList.remainList.length === 0) {
+			setStatus("全て抽選済み")
+			return
+		}
+		phase = "rolling"
+		setButtonLabel("ストップ")
+		setLatest("？")
+		startDrumroll()
+		return
+	}
+
+	// rolling → 停止して抽選確定・公開
+	phase = "idle"
+	setButtonLabel("抽選")
+	stopDrumroll()
 	const drawn = drawNext(numberList)
 	if (drawn === null) {
+		setLatest("")
 		setStatus("全て抽選済み")
 		return
 	}
-	drawing = true
-	const newState: GameState = {
-		remain: numberList.remainList,
-		history: numberList.historyList,
-		card: markNumber(card, drawn),
-	}
-	applyState(newState) // 描画＋演出（history が伸びる）
+	card = markNumber(card, drawn)
+	setLatest(String(drawn))
+	renderBoard()
+	updateStatus()
+	playCymbals()
 	try {
-		await app.callServerTool({name: "sync_state", arguments: {state: newState}})
+		await app.callServerTool({
+			name: "sync_state",
+			arguments: {state: {remain: numberList.remainList, history: numberList.historyList, card}},
+		})
 	} catch (error) {
 		setStatus("同期に失敗しました（ローカルは進行済み）")
 		console.error(error)
-	} finally {
-		drawing = false
 	}
 })
 

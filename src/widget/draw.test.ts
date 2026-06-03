@@ -3,7 +3,7 @@ import {beforeEach, describe, expect, test} from "vitest"
 import {drawNext} from "./draw"
 import NumberList from "@vendor/bingo/numberList"
 
-// 新規の 75 件リスト（localStorage が空なら resetLists で [1..75] になる）
+// 新規の 75 件リスト。resetLists で remain=[1..75]/history=[] に初期化（事前状態に依らない）
 const freshList = (): NumberList => {
 	const numberList = new NumberList()
 	numberList.resetLists()

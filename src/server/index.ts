@@ -5,7 +5,8 @@ import {readFile} from "node:fs/promises"
 import path from "node:path"
 import {fileURLToPath} from "node:url"
 import {z} from "zod"
-import {freshGame} from "./game.js"
+import {drawFromState, freshGame} from "./game.js"
+import {judge} from "../widget/card.js"
 import type {GameState} from "../shared/types.js"
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -78,6 +79,30 @@ registerAppTool(
 		const current = freshGame()
 		game = current
 		return {content: [{type: "text", text: "リセットしました。"}], structuredContent: current}
+	},
+)
+
+registerAppTool(
+	server,
+	"draw_number",
+	{
+		title: "番号を抽選",
+		description: "次の番号を1つ抽選する（チャットからの「次引いて」用）。",
+		inputSchema: {},
+		outputSchema: gameStateShape,
+		_meta: {ui: {resourceUri: RESOURCE_URI}},
+	},
+	async () => {
+		const before = game ?? freshGame()
+		if (before.remain.length === 0) {
+			return {content: [{type: "text", text: "全て抽選済みです。"}], structuredContent: before}
+		}
+		const current = drawFromState(before)
+		game = current
+		const latest = current.history.at(-1)
+		const {bingoLines, reachLines} = judge(current.card)
+		const note = bingoLines.length ? " ビンゴ！" : reachLines.length ? ` リーチ ${reachLines.length}` : ""
+		return {content: [{type: "text", text: `${latest} を抽選。${note}`.trim()}], structuredContent: current}
 	},
 )
 

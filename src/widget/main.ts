@@ -16,6 +16,7 @@ let numberList: NumberList | null = null
 let phase: "idle" | "rolling" = "idle" // ボタンの start/stop 状態
 let suspending = false // チャット抽選の溜め演出中（ボタン操作を抑止）
 let initialized = false // この widget インスタンスで初回の状態適用か
+let generation = 0 // 状態適用の世代。進めると進行中の溜めタイマーのコールバックを無効化できる
 
 // 音源は事前生成して使い回す（毎回 new Audio(data:URL) だと decode 遅延で鳴り出しが遅れる）
 const drumrollAudio = new Audio(drumrollSound)
@@ -100,13 +101,24 @@ function withLatestUnmarked(source: Card, latest: number): Card {
 }
 
 /** チャット抽選結果の widget: 溜め(ドラムロール)→数字公開(シンバル) の演出付きで反映。 */
+/** 進行中の溜め/ロール状態を打ち切り、ボタンを idle に戻す（外部 state 適用時に整合性を保つ）。 */
+function stopTransientUi(): void {
+	generation++ // 保留中の溜めタイマーのコールバックを無効化
+	suspending = false
+	stopDrumroll()
+	if (phase === "rolling") {
+		phase = "idle"
+		setButtonLabel("START")
+	}
+}
+
 function revealWithSuspense(state: GameState): void {
 	const latest = state.history.at(-1)
 	if (latest === undefined || !isValidCard(state.card)) {
-		applyBoardState(state)
-		setLatest("")
+		if (applyBoardState(state)) setLatest("")
 		return
 	}
+	const myGeneration = ++generation
 	suspending = true
 	// 溜め: 数字を「？」・最新マークを伏せて表示し、ドラムロールを鳴らす
 	card = withLatestUnmarked(state.card, latest)
@@ -121,11 +133,14 @@ function revealWithSuspense(state: GameState): void {
 	setLatest("？")
 	startDrumroll()
 	window.setTimeout(() => {
+		if (myGeneration !== generation) return // 途中で別 state が来ていたら破棄（古い state を戻さない）
 		stopDrumroll()
-		applyBoardState(state) // 本来の(マーク済み)状態へ
-		setLatest(String(latest))
-		playCymbals()
 		suspending = false
+		if (applyBoardState(state)) {
+			// 本来の(マーク済み)状態へ。適用成功時のみ番号公開＋シンバル。
+			setLatest(String(latest))
+			playCymbals()
+		}
 	}, REVEAL_DELAY_MS)
 }
 
@@ -142,6 +157,8 @@ app.ontoolresult = result => {
 		revealWithSuspense(state)
 		return
 	}
+	// それ以外(start_bingo / reset_game / sync echo)は、進行中の溜め/ロールを打ち切ってから反映し UI 整合性を保つ
+	stopTransientUi()
 	if (applyBoardState(state)) {
 		const latest = state.history.at(-1)
 		setLatest(latest !== undefined ? String(latest) : "")
@@ -158,7 +175,7 @@ element("draw").addEventListener("click", async () => {
 			return
 		}
 		phase = "rolling"
-		setButtonLabel("ストップ")
+		setButtonLabel("STOP")
 		setLatest("？")
 		startDrumroll()
 		return

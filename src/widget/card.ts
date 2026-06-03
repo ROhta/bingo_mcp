@@ -2,12 +2,18 @@
 // 実行時解決に拡張子が要る（widget 専用ファイルは esbuild が inline するため任意）。
 import {Card, Cell, COLUMN_RANGES, Judgement, Line} from "../shared/types.js"
 
+/** crypto による [0, maxExclusive) の一様乱数。card 生成と抽選で分布を共有する単一実装。 */
+export function randomIndex(maxExclusive: number): number {
+	const buffer = new Uint32Array(1)
+	crypto.getRandomValues(buffer)
+	// 剰余バイアスを避け 0〜1 正規化で写像（本家 NumberList.generateRandomNumber と同方式）
+	return Math.floor(((buffer[0] ?? 0) / 2 ** 32) * maxExclusive)
+}
+
 function pickFiveDistinct(min: number, max: number): number[] {
 	const pool = Array.from({length: max - min + 1}, (_, i) => min + i)
 	for (let i = pool.length - 1; i > 0; i--) {
-		const buf = new Uint32Array(1)
-		crypto.getRandomValues(buf)
-		const j = Math.floor(((buf[0] ?? 0) / 2 ** 32) * (i + 1))
+		const j = randomIndex(i + 1)
 		;[pool[i], pool[j]] = [pool[j]!, pool[i]!]
 	}
 	return pool.slice(0, 5)

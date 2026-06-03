@@ -1,4 +1,4 @@
-import {generateCard, judge, markNumber} from "../widget/card.js"
+import {generateCard, judge, markNumber, randomIndex} from "../widget/card.js"
 import type {Card, GameState} from "../shared/types.js"
 
 /** 新規ゲームの初期状態（remain=1..75, history=空, 新しい5×5カード）。 */
@@ -17,9 +17,7 @@ export function freshGame(): GameState {
  */
 export function drawFromState(game: GameState): GameState {
 	if (game.remain.length === 0) return game
-	const buffer = new Uint32Array(1)
-	crypto.getRandomValues(buffer)
-	const index = Math.floor(((buffer[0] ?? 0) / 2 ** 32) * game.remain.length)
+	const index = randomIndex(game.remain.length)
 	const drawn = game.remain[index]!
 	return {
 		remain: game.remain.filter((_, i) => i !== index),

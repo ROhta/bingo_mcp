@@ -24,11 +24,9 @@ const setStatus = (text: string): void => {
 }
 
 function playSound(dataUrl: string): void {
-	try {
-		void new Audio(dataUrl).play()
-	} catch {
-		/* 演出の失敗(CSP等)はゲーム進行に影響させない */
-	}
+	// play() は失敗時に同期 throw でなく Promise を reject する（自動再生制限/CSP 等）。
+	// 未処理 rejection を避けるため必ず .catch() で握る。演出失敗はゲーム進行に影響させない。
+	void new Audio(dataUrl).play().catch(() => {})
 }
 
 function renderBoard(): void {
@@ -71,8 +69,9 @@ function applyState(state: GameState): void {
 	numberList = new NumberList()
 	const {bingoLines, reachLines} = judge(card)
 	setStatus(bingoLines.length ? "ビンゴ！" : reachLines.length ? `リーチ ${reachLines.length}` : "")
+	// history が空(fresh/reset)なら前回の番号が残らないよう明示的にクリアする
 	const latest = state.history.at(-1)
-	if (latest !== undefined) element("latest").textContent = String(latest)
+	element("latest").textContent = latest !== undefined ? String(latest) : ""
 	renderBoard()
 	if (grew) playSound(bingoLines.length ? cymbalsSound : drumrollSound)
 }

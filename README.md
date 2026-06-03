@@ -54,6 +54,22 @@ bingo を MCP Apps で呼ぶ。チャットで「ビンゴやりたい」と言�
 
 `Math.floor` がここで「`maxExclusive` ちょうど」を返さない点も効いている。u32 の最大値 `2 ** 32 - 1` でも `(2 ** 32 - 1) / 2 ** 32 ≈ 0.99999…`、これに `maxExclusive` を掛けて floor すると必ず `maxExclusive - 1` 以下。返り値は常に `[0, maxExclusive)` に収まり、配列の範囲外アクセスを踏まない（`ceil`/`round` だと上端で範囲外になり得る）。
 
+## 状態の検証境界（書き込みは厳格・読み取りは寛容）
+
+ゲーム状態（`remain`/`history`）の localStorage への出入りは、**書き込み側で厳格に検証し、読み取り側は vendored `NumberList` の寛容な getter に委ねる**という非対称な設計を採る。
+
+| 方向 | 経路 | 検証 |
+|---|---|---|
+| 書き込み（resume seed） | `seedLocalStorage` → `assertBingoNumbers`（`src/widget/hydrate.ts`） | **厳格**：非配列・非整数・`[1,75]` 範囲外を throw |
+| 読み取り（resume restore） | `new NumberList()` の getter（`vendor/bingo`） | **寛容**：非配列は黙って `[]` に縮退。ただし壊れた JSON と範囲外の要素は throw（範囲内の非整数 `[1.5]` は通す） |
+
+この非対称が安全に成り立つ理由：
+
+- 検証が本当に要る untrusted な入力は**サーバー由来の `state`（MCP `structuredContent`）**で、これは widget が **localStorage に書き込む瞬間に `seedLocalStorage` が検証**し、不正なら throw する（`src/widget/main.ts` の呼び出し側が捕捉）。信頼境界は「入口（書き込み）」で守る。
+- widget が `new NumberList()` を作るのは**常に seed 成功の直後**なので、寛容な読み取り getter が見るのは「直前に検証済みの自前データ」だけ。寛容な縮退（非配列→`[]`）が表面化するのは stale／改竄された localStorage を単独で読むレアケースに限られ、空の抽選状態へフォールバックするのはゲーム widget として安全側。
+
+> 旧 `readDrawState`（厳格な読み取り口）はこの経路で未使用だったため削除済み。これにより「resume の読み取りは vendored getter に委ねる」という設計判断が確定している。将来、読み取り側にも厳格さが要るようになったら、`assertBingoNumbers` 相当の検証を読み取り口にも設けること。
+
 ## 開発
 
 ```sh

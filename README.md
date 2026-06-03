@@ -70,6 +70,29 @@ bingo を MCP Apps で呼ぶ。チャットで「ビンゴやりたい」と言�
 
 > 旧 `readDrawState`（厳格な読み取り口）はこの経路で未使用だったため削除済み。これにより「resume の読み取りは vendored getter に委ねる」という設計判断が確定している。将来、読み取り側にも厳格さが要るようになったら、`assertBingoNumbers` 相当の検証を読み取り口にも設けること。
 
+## デプロイ（ローカル / リモート共有）
+
+サーバーは2つの transport に対応する。**差分は transport 初期化だけ**で、ツール・リソース・盤面ロジックは `createBingoServer()`（`src/server/app.ts`）で共通（設計書 §10）。
+
+| | ローカル（個人） | リモート（共有） |
+|---|---|---|
+| transport | stdio | Streamable HTTP（`/mcp`） |
+| 起動 | `pnpm start`（既定） | `pnpm start:http`（`PORT` 既定 3000） |
+| 登録 | Claude Desktop 設定 / `claude mcp add` | claude.ai の Connectors に URL 登録 |
+| state | プロセス内 in-memory（単一盤面） | MCP セッション単位 in-memory |
+
+### セッション分離（HTTP のステートフル設計）
+
+`McpServer` と transport は **1:1**（`Protocol.connect` が単一参照を持つ）。よって HTTP では **MCP セッションごとに `createBingoServer()` を1つ生成**し、`Mcp-Session-Id` ヘッダで `Map<sessionId, transport>` を引いてルーティングする。盤面状態 `game` は各サーバーインスタンスの **closure に閉じる**ため、`Map<sessionId, GameState>` を明示的に持たずとも「1セッション1盤面」が成立する（複数利用者が独立した盤面を持つ）。`transport.onclose` でセッション終了時に Map から除去し、サーバーごと GC させる。
+
+`/mcp` は3メソッドを処理する：`POST`（initialize＝新規セッション／既存セッションへの呼び出し）、`GET`（サーバー→クライアントの SSE 通知ストリーム）、`DELETE`（セッション終了）。
+
+### claude.ai での結合確認
+
+ローカル HTTP を一時公開（trycloudflare 等）し、発行 URL（`https://<sub>.trycloudflare.com/mcp`）を claude.ai の Connectors に登録する。web は sandbox proxy 経由のためレンダリング経路が desktop と異なる（設計書 §11）。
+
+> セキュリティ注: 一時的な手動結合確認スコープのため DNS リバインディング保護（`allowedHosts`/`allowedOrigins`）は付けていない。常設公開する場合は前段に Origin/Host 検証ミドルウェアと認証を置くこと。
+
 ## 開発
 
 ```sh

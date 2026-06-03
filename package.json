@@ -11,6 +11,8 @@
 		"build:widget": "node esbuild.mjs",
 		"build:server": "tsc -p tsconfig.server.json",
 		"build": "pnpm build:widget && pnpm build:server",
+		"start": "node dist/server/index.js",
+		"start:http": "node dist/server/index.js --http",
 		"typecheck": "tsc -p tsconfig.json",
 		"test": "vitest run",
 		"test:watch": "vitest"

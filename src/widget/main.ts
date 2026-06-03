@@ -7,15 +7,20 @@ import NumberList from "@vendor/bingo/numberList"
 import drumrollSound from "../../vendor/bingo/src/materials/drumroll.mp3"
 import cymbalsSound from "../../vendor/bingo/src/materials/cymbals.mp3"
 
-// チャット抽選の「溜め」時間（ドラムロール→数字公開）
-const REVEAL_DELAY_MS = 900
+// チャット抽選の「溜め」時間（ドラムロール→数字公開）。
+// レスポンス待ち中は鳴らす widget が未マウントで不可のため、widget 描画後に 1.5 秒確保する。
+const REVEAL_DELAY_MS = 1500
 
 let card: Card | null = null
 let numberList: NumberList | null = null
 let phase: "idle" | "rolling" = "idle" // ボタンの start/stop 状態
 let suspending = false // チャット抽選の溜め演出中（ボタン操作を抑止）
-let drumroll: HTMLAudioElement | null = null
 let initialized = false // この widget インスタンスで初回の状態適用か
+
+// 音源は事前生成して使い回す（毎回 new Audio(data:URL) だと decode 遅延で鳴り出しが遅れる）
+const drumrollAudio = new Audio(drumrollSound)
+drumrollAudio.loop = true
+const cymbalsAudio = new Audio(cymbalsSound)
 
 const element = (id: string): HTMLElement => {
 	const found = document.getElementById(id)
@@ -32,23 +37,19 @@ const setButtonLabel = (text: string): void => {
 	element("draw").textContent = text
 }
 
-// ドラムロール = 抽選中の「溜め」。ループ再生し、任意に停止できるようインスタンスを保持。
+// ドラムロール = 抽選中の「溜め」。ループ再生し、任意に停止できる。
 function startDrumroll(): void {
-	stopDrumroll()
-	const audio = new Audio(drumrollSound)
-	audio.loop = true
-	drumroll = audio
-	void audio.play().catch(() => {})
+	drumrollAudio.currentTime = 0
+	void drumrollAudio.play().catch(() => {})
 }
 function stopDrumroll(): void {
-	if (drumroll) {
-		drumroll.pause()
-		drumroll = null
-	}
+	drumrollAudio.pause()
+	drumrollAudio.currentTime = 0
 }
 // シンバル = 数字が公開された瞬間（毎回）
 function playCymbals(): void {
-	void new Audio(cymbalsSound).play().catch(() => {})
+	cymbalsAudio.currentTime = 0
+	void cymbalsAudio.play().catch(() => {})
 }
 
 function renderBoard(): void {

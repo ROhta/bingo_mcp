@@ -33,11 +33,13 @@ export type GameState = {
 	card: Card
 }
 
-/** 列ごとの数値レンジ B/I/N/G/O（長さ5を型で固定） */
+// 列ごとの数値レンジ B/I/N/G/O（as const で 長さ5×[number,number] を型に固定）。
+// satisfies は付けない: isolatedDeclarations が `as const satisfies` を自明な型と見なさず
+// TS9010 を出すため。リテラル自体が [number,number] 形状なので satisfies なしでも崩れない。
 export const COLUMN_RANGES = [
 	[1, 15],
 	[16, 30],
 	[31, 45],
 	[46, 60],
 	[61, 75],
-] as const satisfies readonly (readonly [number, number])[]
+] as const

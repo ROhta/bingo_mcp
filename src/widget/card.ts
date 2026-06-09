@@ -1,6 +1,6 @@
 // 相対 import は .js 付き: card.ts は server ビルド(tsc→Node ESM)のグラフに入るため
 // 実行時解決に拡張子が要る（widget 専用ファイルは esbuild が inline するため任意）。
-import {Card, Cell, COLUMN_RANGES, Judgement, Line} from "../shared/types.js"
+import {type Card, type Cell, COLUMN_RANGES, type Judgement, type Line} from "../shared/types.js"
 
 /** crypto による [0, maxExclusive) の実用上ほぼ一様な乱数（maxExclusive>=1 前提）。card 生成と server 抽選で分布を共有する単一実装。 */
 export function randomIndex(maxExclusive: number): number {

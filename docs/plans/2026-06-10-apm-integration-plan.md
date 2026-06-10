@@ -257,6 +257,8 @@ vendor
 apm_modules
 .remember
 pnpm-lock.yaml
+# apm.lock.yaml は apm が書式の権威。prettier 整形すると apm install の出力と毎回衝突し非冪等になるため除外（apm.yml は人間編集 SoT なので整形対象のまま）。
+apm.lock.yaml
 ```
 
 - [ ] **Step 2c: `vitest.config.ts` のテスト探索を自前テストに限定**

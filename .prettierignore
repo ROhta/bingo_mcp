@@ -4,3 +4,6 @@ vendor
 apm_modules
 .remember
 pnpm-lock.yaml
+# apm.lock.yaml は apm が書式の権威（apm install が再生成）。prettier 整形すると
+# apm 本来の書式と毎回衝突して非冪等になるため除外する（apm.yml は人間編集の SoT なので整形対象のまま）。
+apm.lock.yaml

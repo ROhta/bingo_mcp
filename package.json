@@ -13,19 +13,56 @@
 		"build": "pnpm build:widget && pnpm build:server",
 		"typecheck": "tsc -p tsconfig.json",
 		"test": "vitest run",
-		"test:watch": "vitest"
+		"test:watch": "vitest",
+		"prepare": "husky",
+		"lint": "eslint .",
+		"format": "prettier --write ."
 	},
 	"devDependencies": {
+		"@eslint/js": "^10.0.1",
 		"@tsconfig/strictest": "^2.0.8",
 		"@types/node": "^25.9.1",
 		"esbuild": "^0.28.0",
+		"eslint": "^10.4.0",
+		"eslint-config-prettier": "^10.1.8",
+		"globals": "^17.6.0",
+		"husky": "^9.1.7",
 		"jsdom": "^29.1.1",
+		"lint-staged": "^17.0.5",
+		"prettier": "^3.8.3",
 		"typescript": "^6.0.3",
+		"typescript-eslint": "^8.59.4",
 		"vitest": "^4.1.7"
 	},
 	"dependencies": {
 		"@modelcontextprotocol/ext-apps": "^1.7.3",
 		"@modelcontextprotocol/sdk": "^1.29.0",
 		"zod": "^4.4.3"
+	},
+	"prettier": {
+		"printWidth": 1000,
+		"tabWidth": 2,
+		"useTabs": true,
+		"semi": false,
+		"singleQuote": false,
+		"quoteProps": "as-needed",
+		"trailingComma": "all",
+		"bracketSpacing": false,
+		"bracketSameLine": false,
+		"arrowParens": "avoid",
+		"proseWrap": "always",
+		"endOfLine": "lf"
+	},
+	"lint-staged": {
+		"*.{ts,mjs,cjs}": [
+			"eslint --fix",
+			"prettier --write"
+		],
+		"*.{html,css,json,md}": [
+			"prettier --write"
+		],
+		"!(pnpm-lock).{yml,yaml}": [
+			"prettier --write"
+		]
 	}
 }

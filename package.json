@@ -16,7 +16,8 @@
 		"test:watch": "vitest",
 		"prepare": "husky",
 		"lint": "eslint .",
-		"format": "prettier --write ."
+		"format": "prettier --write .",
+		"apm-install": "apm install"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

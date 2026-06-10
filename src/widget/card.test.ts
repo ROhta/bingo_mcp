@@ -33,14 +33,16 @@ describe("generateCard", () => {
 		expect(card[2]![2]!.marked).toBe(true)
 	})
 	test("生成直後のマークは中央FREEの1個だけ", () => {
-		expect(generateCard().flat().filter(c => c.marked)).toHaveLength(1)
+		expect(
+			generateCard()
+				.flat()
+				.filter(c => c.marked),
+		).toHaveLength(1)
 	})
 })
 
 function makeCard(values: number[][]): Card {
-	return values.map((col, c) =>
-		col.map((value, r) => (c === 2 && r === 2 ? {value: "FREE" as const, marked: true} : {value, marked: false})),
-	)
+	return values.map((col, c) => col.map((value, r) => (c === 2 && r === 2 ? {value: "FREE" as const, marked: true} : {value, marked: false})))
 }
 const base = (): Card =>
 	makeCard([

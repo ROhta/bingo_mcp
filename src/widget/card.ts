@@ -22,11 +22,7 @@ function pickFiveDistinct(min: number, max: number): number[] {
 
 /** 各列レンジから重複なく5個。中央(列2,行2)は FREE(初期 marked)。 */
 export function generateCard(): Card {
-	return COLUMN_RANGES.map(([min, max], col) =>
-		pickFiveDistinct(min, max).map((value, row) =>
-			col === 2 && row === 2 ? {value: "FREE" as const, marked: true} : {value, marked: false},
-		),
-	)
+	return COLUMN_RANGES.map(([min, max], col) => pickFiveDistinct(min, max).map((value, row) => (col === 2 && row === 2 ? {value: "FREE" as const, marked: true} : {value, marked: false})))
 }
 
 /** 抽選番号に一致するセルを marked=true にした新しいカードを返す（不変更新）。 */
@@ -35,12 +31,7 @@ export function markNumber(card: Card, drawnNumber: number): Card {
 }
 
 /** 判定対象の全12ライン（5行 + 5列 + 2対角）。index は型で 0..4 / 0|1 に縛られる。 */
-const ALL_LINES: Line[] = [
-	...([0, 1, 2, 3, 4] as const).map(index => ({kind: "row" as const, index})),
-	...([0, 1, 2, 3, 4] as const).map(index => ({kind: "col" as const, index})),
-	{kind: "diag" as const, index: 0},
-	{kind: "diag" as const, index: 1},
-]
+const ALL_LINES: Line[] = [...([0, 1, 2, 3, 4] as const).map(index => ({kind: "row" as const, index})), ...([0, 1, 2, 3, 4] as const).map(index => ({kind: "col" as const, index})), {kind: "diag" as const, index: 0}, {kind: "diag" as const, index: 1}]
 
 /** ライン上の5セルを取り出す（plumbing）。 */
 export function lineCells(card: Card, line: Line): Cell[] {

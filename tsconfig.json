@@ -15,7 +15,7 @@
 		"useDefineForClassFields": true,
 		"moduleDetection": "force",
 		"allowJs": false,
-		"paths": { "@vendor/bingo/numberList": ["./vendor/bingo/src/ts/numberList.ts"] }
+		"paths": {"@vendor/bingo/numberList": ["./vendor/bingo/src/ts/numberList.ts"]}
 	},
 	"include": ["src/**/*.ts", "vendor/bingo/src/ts/numberList.ts"]
 }

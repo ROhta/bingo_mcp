@@ -10,20 +10,20 @@ bingo を MCP Apps で呼ぶ。チャットで「ビンゴやりたい」と言�
 
 ### 依存している部分
 
-| 種類 | 実ファイル | 使用箇所 |
-|---|---|---|
-| 抽選ロジック `NumberList` クラス | `vendor/bingo/src/ts/numberList.ts`（alias `@vendor/bingo/numberList`） | `src/widget/draw.ts`, `src/widget/main.ts`, テスト |
-| 演出音アセット | `vendor/bingo/src/materials/{drumroll,cymbals}.mp3` | `src/widget/main.ts`（esbuild が dataurl 化してインライン） |
+| 種類                             | 実ファイル                                                              | 使用箇所                                                    |
+| -------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------- |
+| 抽選ロジック `NumberList` クラス | `vendor/bingo/src/ts/numberList.ts`（alias `@vendor/bingo/numberList`） | `src/widget/draw.ts`, `src/widget/main.ts`, テスト          |
+| 演出音アセット                   | `vendor/bingo/src/materials/{drumroll,cymbals}.mp3`                     | `src/widget/main.ts`（esbuild が dataurl 化してインライン） |
 
 `NumberList` は remain/history を localStorage に持つ抽選ステートマシン。これを **widget 側がそのまま実行**することで本家の挙動を忠実に再現する（C案）。alias は `tsconfig.json`（paths＋include）/ `esbuild.mjs` / `vitest.config.ts` の3箇所で配線。
 
 ### 依存して**いない**部分（本 repo 側で再実装）
 
-| 機能 | 出所 |
-|---|---|
-| カード生成・マーク・リーチ/ビンゴ判定 | `src/widget/card.ts` |
-| `GameState` 型・サーバー権威状態 | `src/shared/types.ts` |
-| サーバー側抽選 `drawFromState` | `src/server/game.ts` — `card.ts` の `randomIndex` を使い `NumberList` を import しない |
+| 機能                                  | 出所                                                                                   |
+| ------------------------------------- | -------------------------------------------------------------------------------------- |
+| カード生成・マーク・リーチ/ビンゴ判定 | `src/widget/card.ts`                                                                   |
+| `GameState` 型・サーバー権威状態      | `src/shared/types.ts`                                                                  |
+| サーバー側抽選 `drawFromState`        | `src/server/game.ts` — `card.ts` の `randomIndex` を使い `NumberList` を import しない |
 
 依存は非対称で、**widget 側だけが `NumberList` を実行し、server 側は submodule に一切触れない**。`randomIndex` は本家 `NumberList.generateRandomNumber` の式を「import せず再現」したもので、これにより server は submodule のチェックアウト無しでもビルド・抽選でき、widget は本家を忠実に走らせる、という役割分担が依存グラフにそのまま表れている。
 
@@ -58,10 +58,10 @@ bingo を MCP Apps で呼ぶ。チャットで「ビンゴやりたい」と言�
 
 ゲーム状態（`remain`/`history`）の localStorage への出入りは、**書き込み側で厳格に検証し、読み取り側は vendored `NumberList` の寛容な getter に委ねる**という非対称な設計を採る。
 
-| 方向 | 経路 | 検証 |
-|---|---|---|
-| 書き込み（resume seed） | `seedLocalStorage` → `assertBingoNumbers`（`src/widget/hydrate.ts`） | **厳格**：非配列・非整数・`[1,75]` 範囲外を throw |
-| 読み取り（resume restore） | `new NumberList()` の getter（`vendor/bingo`） | **寛容**：非配列は黙って `[]` に縮退。ただし壊れた JSON と範囲外の要素は throw（範囲内の非整数 `[1.5]` は通す） |
+| 方向                       | 経路                                                                 | 検証                                                                                                            |
+| -------------------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| 書き込み（resume seed）    | `seedLocalStorage` → `assertBingoNumbers`（`src/widget/hydrate.ts`） | **厳格**：非配列・非整数・`[1,75]` 範囲外を throw                                                               |
+| 読み取り（resume restore） | `new NumberList()` の getter（`vendor/bingo`）                       | **寛容**：非配列は黙って `[]` に縮退。ただし壊れた JSON と範囲外の要素は throw（範囲内の非整数 `[1.5]` は通す） |
 
 この非対称が安全に成り立つ理由：
 

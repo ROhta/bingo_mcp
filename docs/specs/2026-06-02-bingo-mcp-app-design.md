@@ -8,14 +8,14 @@
 
 ## 0. v2 での変更点（レビュー反映）
 
-v1 は「サーバーは状態を持たず、全状態をウィジェットが保持」と断定していたが、ext-apps 仕様
-（2026-01-26, `specification/2026-01-26/apps.mdx`）の一次確認で以下が判明し、根幹を改訂した。
+v1 は「サーバーは状態を持たず、全状態をウィジェットが保持」と断定していたが、ext-apps 仕様（2026-01-26, `specification/2026-01-26/apps.mdx`）の一次確認で以下が判明し、根幹を改訂した。
 
 - View は**ターンごとに破棄・再生成**され（`ui/resource-teardown`）、**状態永続化 API は未定義**（"State persistence and restoration" は Future Considerations 止まり）。→ ウィジェット単独ではターン跨ぎで状態が消える。
 - UIリソースの `mimeType` は **MUST `text/html;profile=mcp-app`**（v1 の `text/html` は誤り）。
 - 静的リソースは CSP `resourceDomains` 宣言が必要。未宣言オリジンはブロック（MUST）。
 
 主な改訂:
+
 1. 状態権威を **C案（サーバーは平データのチェックポイント、ウィジェットは各 render で再シードして `NumberList` を動かす）** に確定（§2/§4/§9）。
 2. `mimeType` を `text/html;profile=mcp-app` に訂正（§7）。
 3. §13 を「(A) 名称・手順確認」と「(B) 着手前スパイク必須の能力検証」に分離し、**Phase 0 スパイク**を新設（§12/§13）。
@@ -25,21 +25,19 @@ v1 は「サーバーは状態を持たず、全状態をウィジェットが�
 
 ## 1. 目的
 
-Claude のグラフィカルクライアント（claude.ai web / Claude Desktop）のチャット内で、
-「ビンゴやりたい」と言うと **MCP Apps のウィジェット**としてビンゴ盤面が描画され、その場で遊べるようにする。
-既存の `ROhta/bingo`（パーティ向けビンゴ抽選機）のソースを**改変せず呼び出して**再利用する。
+Claude のグラフィカルクライアント（claude.ai web / Claude Desktop）のチャット内で、「ビンゴやりたい」と言うと **MCP Apps のウィジェット**としてビンゴ盤面が描画され、その場で遊べるようにする。既存の `ROhta/bingo`（パーティ向けビンゴ抽選機）のソースを**改変せず呼び出して**再利用する。
 
 ## 2. 確定した意思決定
 
-| 論点 | 決定 | 根拠 |
-|---|---|---|
-| 舞台 | claude.ai web / Claude Desktop（グラフィカルClaude） | MCP Apps の iframe はターミナルの Claude Code では描画されない |
-| スコープ | 抽選機の再現 ＋ 5×5 ビンゴカード（マーク・リーチ/ビンゴ判定）。単一盤面のみ | ユーザー選択。マルチプレイ・複数同時盤面は対象外 |
-| デプロイ | ローカル（stdio）先行 → リモート（HTTP Connector）共有も可能な両対応 | ユーザー選択 |
-| 設計の軸 | **既存ソースの忠実な再利用を優先**（`NumberList` をウィジェットで無改変利用） | ユーザー選択 |
-| 状態権威 | **C案: サーバーが平データのチェックポイントを保持／ウィジェットが各 render で再シードして `NumberList` を実行し、結果をサーバーへ同期** | View は毎ターン破棄・永続化 API 無し（仕様確認）。忠実な再利用とターン跨ぎ耐性の両立 |
-| 抽選(RNG)の権威 | **常にウィジェットの `NumberList`**。サーバーは抽選しない（平データを預かるのみ） | RNG 経路を一本化し、サーバー側のロジック重複を避ける |
-| 再利用元の取り込み | git submodule（`vendor/bingo`）。無改変、`--remote` で上流追従 | `bingo` は npm パッケージ化されておらず import 実体が無い（§3.1） |
+| 論点               | 決定                                                                                                                                    | 根拠                                                                                 |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| 舞台               | claude.ai web / Claude Desktop（グラフィカルClaude）                                                                                    | MCP Apps の iframe はターミナルの Claude Code では描画されない                       |
+| スコープ           | 抽選機の再現 ＋ 5×5 ビンゴカード（マーク・リーチ/ビンゴ判定）。単一盤面のみ                                                             | ユーザー選択。マルチプレイ・複数同時盤面は対象外                                     |
+| デプロイ           | ローカル（stdio）先行 → リモート（HTTP Connector）共有も可能な両対応                                                                    | ユーザー選択                                                                         |
+| 設計の軸           | **既存ソースの忠実な再利用を優先**（`NumberList` をウィジェットで無改変利用）                                                           | ユーザー選択                                                                         |
+| 状態権威           | **C案: サーバーが平データのチェックポイントを保持／ウィジェットが各 render で再シードして `NumberList` を実行し、結果をサーバーへ同期** | View は毎ターン破棄・永続化 API 無し（仕様確認）。忠実な再利用とターン跨ぎ耐性の両立 |
+| 抽選(RNG)の権威    | **常にウィジェットの `NumberList`**。サーバーは抽選しない（平データを預かるのみ）                                                       | RNG 経路を一本化し、サーバー側のロジック重複を避ける                                 |
+| 再利用元の取り込み | git submodule（`vendor/bingo`）。無改変、`--remote` で上流追従                                                                          | `bingo` は npm パッケージ化されておらず import 実体が無い（§3.1）                    |
 
 ## 3. 既存ソース（`ROhta/bingo`）の調査結果と再利用方針
 
@@ -53,17 +51,15 @@ Claude のグラフィカルクライアント（claude.ai web / Claude Desktop�
 
 ### 3.2 再利用方針（何を・どこで）
 
-| 要素 | 置き場所 | 出所 |
-|---|---|---|
-| `NumberList`（範囲[1,75]/検証/localStorage履歴/乱数） | ウィジェット（iframe＝ブラウザ環境） | **submodule のソースを無改変で import**（忠実な再利用） |
-| 抽選フロー（remain→history） | ウィジェット `draw.ts` | 新規（`NumberList` の公開 API に乗せる薄い順序ロジック） |
-| 5×5 カード生成・マーク・リーチ/ビンゴ判定 | ウィジェット `card.ts` | **100%新規**（純関数、§9b に契約） |
-| 演出（ドラムロール/シンバル） | ウィジェット | submodule の `materials/*.mp3` を **data: URL でインライン化** |
-| 平データのチェックポイント保持・UIリソース配信・ツール | サーバー | 新規（薄型・抽選はしない） |
+| 要素                                                   | 置き場所                             | 出所                                                           |
+| ------------------------------------------------------ | ------------------------------------ | -------------------------------------------------------------- |
+| `NumberList`（範囲[1,75]/検証/localStorage履歴/乱数）  | ウィジェット（iframe＝ブラウザ環境） | **submodule のソースを無改変で import**（忠実な再利用）        |
+| 抽選フロー（remain→history）                           | ウィジェット `draw.ts`               | 新規（`NumberList` の公開 API に乗せる薄い順序ロジック）       |
+| 5×5 カード生成・マーク・リーチ/ビンゴ判定              | ウィジェット `card.ts`               | **100%新規**（純関数、§9b に契約）                             |
+| 演出（ドラムロール/シンバル）                          | ウィジェット                         | submodule の `materials/*.mp3` を **data: URL でインライン化** |
+| 平データのチェックポイント保持・UIリソース配信・ツール | サーバー                             | 新規（薄型・抽選はしない）                                     |
 
-> 再利用の実体は `NumberList` 本体のみであり、過大な再利用主張はしない。
-> `NumberList` を**ブラウザ環境（iframe）でそのまま動かす**ことで localStorage シムを排除する。
-> サーバーが保持するのは `NumberList` インスタンスではなく、その状態を表す**平データ**（後述）。
+> 再利用の実体は `NumberList` 本体のみであり、過大な再利用主張はしない。 `NumberList` を**ブラウザ環境（iframe）でそのまま動かす**ことで localStorage シムを排除する。サーバーが保持するのは `NumberList` インスタンスではなく、その状態を表す**平データ**（後述）。
 
 ## 4. アーキテクチャ
 
@@ -95,14 +91,14 @@ Claude のグラフィカルクライアント（claude.ai web / Claude Desktop�
 
 ## 5. コンポーネントと責務
 
-| 単位 | 責務 | 依存 | 純粋性/テスト |
-|---|---|---|---|
-| `vendor/bingo`（submodule） | 既存ビンゴ抽選機ソース（無改変） | なし | 上流を信頼＋取り込みスモーク |
-| `src/widget/card.ts` | カード生成・マーク・リーチ/ビンゴ判定 | **なし（純関数）** | Node でユニットテスト |
-| `src/widget/draw.ts` | 抽選フロー（remain→history の順序ロジック）＋ `NumberList` への副作用呼び出し | `NumberList`（=`localStorage`） | **純粋でない**。順序ロジックを純関数化し、`NumberList` 呼び出しは薄いアダプタに隔離。純粋部のみ Node テスト、結合は jsdom/実 iframe |
-| `src/widget/hydrate.ts` | サーバー state → localStorage 再シード／現 state 抽出 | `localStorage` | jsdom テスト |
-| `src/widget/main.ts` + `bridge.ts` | 描画・ブリッジ（tools/call、通知受領、ui/update-model-context） | ext-apps app/bridge | iframe 結合確認 |
-| `src/server/index.ts` | `ui://bingo/board` 登録・ツール・チェックポイント保持・トランスポート | ext-apps server, MCP SDK | ツール入出力契約テスト |
+| 単位                               | 責務                                                                          | 依存                            | 純粋性/テスト                                                                                                                       |
+| ---------------------------------- | ----------------------------------------------------------------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `vendor/bingo`（submodule）        | 既存ビンゴ抽選機ソース（無改変）                                              | なし                            | 上流を信頼＋取り込みスモーク                                                                                                        |
+| `src/widget/card.ts`               | カード生成・マーク・リーチ/ビンゴ判定                                         | **なし（純関数）**              | Node でユニットテスト                                                                                                               |
+| `src/widget/draw.ts`               | 抽選フロー（remain→history の順序ロジック）＋ `NumberList` への副作用呼び出し | `NumberList`（=`localStorage`） | **純粋でない**。順序ロジックを純関数化し、`NumberList` 呼び出しは薄いアダプタに隔離。純粋部のみ Node テスト、結合は jsdom/実 iframe |
+| `src/widget/hydrate.ts`            | サーバー state → localStorage 再シード／現 state 抽出                         | `localStorage`                  | jsdom テスト                                                                                                                        |
+| `src/widget/main.ts` + `bridge.ts` | 描画・ブリッジ（tools/call、通知受領、ui/update-model-context）               | ext-apps app/bridge             | iframe 結合確認                                                                                                                     |
+| `src/server/index.ts`              | `ui://bingo/board` 登録・ツール・チェックポイント保持・トランスポート         | ext-apps server, MCP SDK        | ツール入出力契約テスト                                                                                                              |
 
 `NumberList` は `export default` のため **`import NumberList from "…/numberList"`**（デフォルトインポート）で取り込む。
 
@@ -128,6 +124,7 @@ bingo_mcp/
 ```
 
 ビルド時の注意:
+
 - TS の `paths` は**型解決のエイリアスのみ**。実体のバンドルには**バンドラの resolve.alias（vite）/ alias（esbuild）も必要**で、`vendor/bingo/src/ts/*.ts` を新リポ側 tsconfig の `include` に含める。
 - `materials/*.mp3` は **data: URL（base64）でインライン化**（CSP `resourceDomains` ブロック回避）。外部 CDN 参照は避ける。
 - 非ブロッカー（明記）: vendor の `engines: node>=24` / `pnpm>=11` は**新リポの取り込みには無関係**（バンドラが直接コンパイル）。private `#` フィールドもモダンターゲットならネイティブ対応。
@@ -138,14 +135,15 @@ bingo_mcp/
 - 各ツールは `_meta.ui.resourceUri = "ui://bingo/board"` で UI を紐付け。
 - 戻りは「モデル用テキスト」＋「ウィジェット用 structuredContent（= GameState 平データ）」の二層。
 
-| ツール | 入力 | 動作 | 備考 |
-|---|---|---|---|
-| `start_bingo` | `{mode?: "resume"｜"fresh"}` | セッションの GameState を用意し盤面を開く。既定: 既存があれば **resume**、無ければ fresh | 中核。チャット起動の入口 |
-| `draw_number` | なし | チャットからの抽選。新 View に tool-input{action:"draw"} を渡し、**View 側で `NumberList` が抽選**→sync | 二次機能。RNG はあくまでウィジェット |
-| `sync_state` | `{state: GameState}` | ウィジェットからの状態同期をチェックポイントに保存 | ウィジェット→サーバー（tools/call）。抽選/マークの度に呼ぶ |
-| `reset_game` | なし | チェックポイントを初期化し新規ゲーム | ウィジェット内ボタンでも完結可。チャット起点時は draw_number と同様の経路 |
+| ツール        | 入力                         | 動作                                                                                                    | 備考                                                                      |
+| ------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `start_bingo` | `{mode?: "resume"｜"fresh"}` | セッションの GameState を用意し盤面を開く。既定: 既存があれば **resume**、無ければ fresh                | 中核。チャット起動の入口                                                  |
+| `draw_number` | なし                         | チャットからの抽選。新 View に tool-input{action:"draw"} を渡し、**View 側で `NumberList` が抽選**→sync | 二次機能。RNG はあくまでウィジェット                                      |
+| `sync_state`  | `{state: GameState}`         | ウィジェットからの状態同期をチェックポイントに保存                                                      | ウィジェット→サーバー（tools/call）。抽選/マークの度に呼ぶ                |
+| `reset_game`  | なし                         | チェックポイントを初期化し新規ゲーム                                                                    | ウィジェット内ボタンでも完結可。チャット起点時は draw_number と同様の経路 |
 
 確認済みの通信プリミティブ（ext-apps 2026-01-26）:
+
 - Host→View: `ui/notifications/tool-input` / `tool-result` / `tool-input-partial` / `tool-cancelled` / `host-context-changed`。
 - View→モデル: `ui/message`（チャットに発話追加）/ `ui/update-model-context`（会話コンテキスト更新）。
 
@@ -193,16 +191,15 @@ function judge(card: Card):                   // マーク状態のみで判定�
 
 ## 10. デプロイ（両対応）
 
-| | ローカル（個人） | リモート（共有） |
-|---|---|---|
-| transport | stdio | Streamable HTTP |
-| 登録方法 | Claude Desktop 設定 / `claude mcp add` | claude.ai の Connectors に URL 登録（プラン/組織設定に依存） |
-| 認証 | 不要 | 公開範囲に応じ OAuth 等 |
-| state | 同一プロセス内 in-memory | MCP セッション単位で in-memory（DB 不要。必要なら後で永続化） |
+|            | ローカル（個人）                                                 | リモート（共有）                                              |
+| ---------- | ---------------------------------------------------------------- | ------------------------------------------------------------- |
+| transport  | stdio                                                            | Streamable HTTP                                               |
+| 登録方法   | Claude Desktop 設定 / `claude mcp add`                           | claude.ai の Connectors に URL 登録（プラン/組織設定に依存）  |
+| 認証       | 不要                                                             | 公開範囲に応じ OAuth 等                                       |
+| state      | 同一プロセス内 in-memory                                         | MCP セッション単位で in-memory（DB 不要。必要なら後で永続化） |
 | コード差分 | **transport 初期化のみ**（ロジック・ツール・ウィジェットは共通） |
 
-> サーバーは平データの薄いチェックポイントのみを持つため、両対応は実質トランスポート初期化の差。
-> レンダリング経路は web（sandbox proxy 経由）と desktop（直接）で異なるが、サーバーコードには波及しない。
+> サーバーは平データの薄いチェックポイントのみを持つため、両対応は実質トランスポート初期化の差。レンダリング経路は web（sandbox proxy 経由）と desktop（直接）で異なるが、サーバーコードには波及しない。
 
 ## 11. テスト方針
 
@@ -214,10 +211,8 @@ function judge(card: Card):                   // マーク状態のみで判定�
 
 ## 12. 段階的実装計画
 
-- **Phase 0（フィージビリティ・スパイク／着手前必須）**: ext-apps SDK で §13(B) の能力を最小実装で検証 —
-  (a) tool-result の structuredContent が View に届き再シードできる、(b) tool-input{action} を新 View が受け取れる、
-  (c) View→サーバーの tools/call(sync) が通る、(d) ui/update-model-context でモデルが状態を認識できる。
-  いずれか不可なら該当機能のフォールバック（§13(B) 参照）を確定してから先へ。
+- **Phase 0（フィージビリティ・スパイク／着手前必須）**: ext-apps SDK で §13(B) の能力を最小実装で検証 — (a) tool-result の structuredContent が View に届き再シードできる、(b) tool-input{action} を新 View が受け取れる、(c) View→サーバーの tools/call(sync) が通る、(d) ui/update-model-context でモデルが状態を認識できる。いずれか不可なら該当機能のフォールバック（§13(B) 参照）を確定してから先へ。
+
 1. 新リポ雛形 ＋ submodule 追加（`vendor/bingo`）、tsconfig paths＋バンドラ alias、widget バンドラ整備、取り込みスモーク。
 2. ウィジェット骨格：`hydrate.ts`＋`NumberList` を iframe で動かし抽選ボタン→履歴更新（localStorage 動作確認）。
 3. `card.ts`（TDD：§9b の契約を満たす純関数）。
@@ -230,11 +225,13 @@ function judge(card: Card):                   // マーク状態のみで判定�
 `modelcontextprotocol/ext-apps` の最新ドキュメント（build-mcp-app スキル経由）で確定する。
 
 **(A) 名称・手順の確認（低リスク・実装時で可）**
+
 - ツール紐付け `_meta` キーの正確な記法（`_meta.ui.resourceUri`）。
 - SDK パッケージ（`@modelcontextprotocol/ext-apps` / `/react` / `/app-bridge` / `/server`）の API。
 - Streamable HTTP トランスポートと Connector 登録の手順・認証。
 
 **(B) Phase 0 でスパイク検証する能力（高リスク・着手前）**
+
 - structuredContent による View 再シード（§9 の前提）。
 - tool-input による「draw 意図」受領（§7 `draw_number`、§8③）。
 - View→サーバー tools/call(sync) と View→モデル `ui/update-model-context`/`ui/message`（§8②④）。

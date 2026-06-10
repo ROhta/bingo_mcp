@@ -22,22 +22,23 @@
 
 ## ファイル構成（作成・変更一覧）
 
-| パス | 操作 | 責務 |
-|---|---|---|
-| `.gitignore` | 変更（末尾追記） | APM 生成物を追跡対象から除外 |
-| `package.json` | 変更 | devDeps・scripts（`prepare`/`apm-install`）・`prettier`・`lint-staged` 追記 |
-| `eslint.config.mjs` | 作成 | flat config（recommend 準拠、widget=browser / server=node） |
-| `.husky/pre-commit` | 作成 | `pnpm exec lint-staged` |
-| `apm.yml` | 作成 | MCP 依存・APM パッケージ・targets の SoT |
-| `.apm/instructions/apm.instructions.md` | 作成 | APM 運用・依存・MCP の SoT 指示 |
-| `.apm/instructions/architecture.instructions.md` | 作成 | 責務分担・乱数・検証境界・MCP ツール・状態権威 |
-| `.apm/instructions/widget.instructions.md` | 作成 | widget UI/ビルド（CSS・CSP・mp3・esbuild） |
-| `.apm/instructions/development.instructions.md` | 作成 | 環境構築・ビルド・lint・起動 |
-| `.apm/instructions/workflow.instructions.md` | 作成 | 開発フロー・AIワークフロー・PRレビュー・GitHub運用 |
-| `.github/copilot-instructions.md` | 作成 | Copilot Code Review に SoT 所在を伝えるスタブ |
-| `apm.lock.yaml` | 生成（追跡） | `apm install` 生成。整合性・再現性のため例外的に追跡 |
-| `scripts/dedupe-apm-lock.mjs` | 作成（条件付き） | lockfile 重複除去（0.19.0 で重複が出た場合のみ） |
-| `README.md` | 変更（薄化） | 概要＋ `.apm/instructions/` 索引 |
+| パス                                             | 操作             | 責務                                                                               |
+| ------------------------------------------------ | ---------------- | ---------------------------------------------------------------------------------- |
+| `.gitignore`                                     | 変更（末尾追記） | APM 生成物を追跡対象から除外                                                       |
+| `package.json`                                   | 変更             | devDeps・scripts（`prepare`/`apm-install`）・`prettier`・`lint-staged` 追記        |
+| `eslint.config.mjs`                              | 作成             | flat config（recommend 準拠、widget=browser / server=node）                        |
+| `.prettierignore`                                | 作成             | `prettier --write/--check .` 全ツリー実行時に vendor/dist/生成物を整形対象外にする |
+| `.husky/pre-commit`                              | 作成             | `pnpm exec lint-staged`                                                            |
+| `apm.yml`                                        | 作成             | MCP 依存・APM パッケージ・targets の SoT                                           |
+| `.apm/instructions/apm.instructions.md`          | 作成             | APM 運用・依存・MCP の SoT 指示                                                    |
+| `.apm/instructions/architecture.instructions.md` | 作成             | 責務分担・乱数・検証境界・MCP ツール・状態権威                                     |
+| `.apm/instructions/widget.instructions.md`       | 作成             | widget UI/ビルド（CSS・CSP・mp3・esbuild）                                         |
+| `.apm/instructions/development.instructions.md`  | 作成             | 環境構築・ビルド・lint・起動                                                       |
+| `.apm/instructions/workflow.instructions.md`     | 作成             | 開発フロー・AIワークフロー・PRレビュー・GitHub運用                                 |
+| `.github/copilot-instructions.md`                | 作成             | Copilot Code Review に SoT 所在を伝えるスタブ                                      |
+| `apm.lock.yaml`                                  | 生成（追跡）     | `apm install` 生成。整合性・再現性のため例外的に追跡                               |
+| `scripts/dedupe-apm-lock.mjs`                    | 作成（条件付き） | lockfile 重複除去（0.19.0 で重複が出た場合のみ）                                   |
+| `README.md`                                      | 変更（薄化）     | 概要＋ `.apm/instructions/` 索引                                                   |
 
 ---
 
@@ -48,6 +49,7 @@
 - [ ] **Step 1: 前提ツールのバージョン確認**
 
 Run:
+
 ```bash
 apm --version          # Expected: 0.19.0 (fa8a0ca) 以上
 node --version         # Expected: v24.16.0 以上（package.json engines）
@@ -55,15 +57,18 @@ corepack enable && pnpm --version   # pnpm を有効化
 uvx --version          # serena/semgrep の起動に必要
 git submodule status   # vendor/bingo がチェックアウト済みであること
 ```
+
 Expected: いずれも成功。`apm` が無い場合は microsoft/apm の README に従い導入してから続行。
 
 - [ ] **Step 2: 実装ブランチを作成**
 
 Run:
+
 ```bash
 git checkout main && git pull
 git checkout -b feat/apm-integration
 ```
+
 Expected: `feat/apm-integration` ブランチに移動。
 
 ---
@@ -71,6 +76,7 @@ Expected: `feat/apm-integration` ブランチに移動。
 ## Task 1: `.gitignore` に APM 生成物ブロックを追記（install より前に必須）
 
 **Files:**
+
 - Modify: `.gitignore`（末尾に追記）
 
 - [ ] **Step 1: APM ブロックを `.gitignore` 末尾へ追記**
@@ -104,15 +110,19 @@ apm_modules/
 - [ ] **Step 2: 既存追跡物と衝突しないことを確認**
 
 Run:
+
 ```bash
 git check-ignore -v CLAUDE.md AGENTS.md .claude/rules/ .github/instructions/ .mcp.json .codex/ apm_modules/
 ```
+
 Expected: 各パスが `.gitignore` の該当行にマッチして出力される（= ignore 済み）。
 
 Run:
+
 ```bash
 git ls-files | grep -E '^(CLAUDE\.md|AGENTS\.md|\.claude/|\.github/instructions/|\.mcp\.json|\.codex/)' || echo "no tracked generated files (OK)"
 ```
+
 Expected: `no tracked generated files (OK)`（既に追跡された生成物が無い）。
 
 - [ ] **Step 3: コミット**
@@ -127,8 +137,10 @@ git commit -m "chore: APM 生成物を .gitignore に追加（apm install 前の
 ## Task 2: Lint/整形ツール（eslint + prettier + husky + lint-staged）を導入
 
 **Files:**
+
 - Modify: `package.json`
 - Create: `eslint.config.mjs`
+- Create: `.prettierignore`
 - Create: `.husky/pre-commit`
 
 - [ ] **Step 1: devDependencies と scripts・prettier・lint-staged を `package.json` に追記**
@@ -136,6 +148,7 @@ git commit -m "chore: APM 生成物を .gitignore に追加（apm install 前の
 `package.json` を以下のように変更する（既存キーは保持し、`scripts` にエントリ追加、`devDependencies` に追加、トップレベルに `prettier` と `lint-staged` を追加）。
 
 `scripts` に追加するエントリ:
+
 ```json
 "prepare": "husky",
 "lint": "eslint .",
@@ -143,6 +156,7 @@ git commit -m "chore: APM 生成物を .gitignore に追加（apm install 前の
 ```
 
 `devDependencies` に追加するエントリ:
+
 ```json
 "@eslint/js": "^10.0.1",
 "eslint": "^10.4.0",
@@ -155,6 +169,7 @@ git commit -m "chore: APM 生成物を .gitignore に追加（apm install 前の
 ```
 
 トップレベルに追加する `prettier` 設定（bingo と統一。既存コードは tabs/double quote/semi なしで一致済み）:
+
 ```json
 "prettier": {
 	"printWidth": 1000,
@@ -173,6 +188,7 @@ git commit -m "chore: APM 生成物を .gitignore に追加（apm install 前の
 ```
 
 トップレベルに追加する `lint-staged` 設定:
+
 ```json
 "lint-staged": {
 	"*.{ts,mjs,cjs}": ["eslint --fix", "prettier --write"],
@@ -228,12 +244,27 @@ export default tseslint.config(
 )
 ```
 
+- [ ] **Step 2b: `.prettierignore` を作成**
+
+`prettier --write .` / `--check .` を全ツリーに走らせるため、整形不要・整形してはいけない領域を除外する。
+
+```gitignore
+node_modules
+dist
+vendor
+apm_modules
+.remember
+pnpm-lock.yaml
+```
+
 - [ ] **Step 3: 依存をインストール**
 
 Run:
+
 ```bash
 pnpm install
 ```
+
 Expected: lockfile 更新、eslint/prettier/husky/lint-staged 等が node_modules に入る。`husky` の `prepare` スクリプトが走り `.husky/` が初期化される。
 
 - [ ] **Step 4: `.husky/pre-commit` を作成**
@@ -245,6 +276,7 @@ pnpm exec lint-staged
 ```
 
 Run:
+
 ```bash
 chmod +x .husky/pre-commit
 ```
@@ -252,23 +284,29 @@ chmod +x .husky/pre-commit
 - [ ] **Step 5: eslint と prettier が既存コードを壊さないことを確認**
 
 Run:
+
 ```bash
 pnpm exec prettier --check . 2>&1 | tail -20
 ```
+
 Expected: 既存 `src/**/*.ts` は概ね整形済みのはず。差分が出るファイルがあれば `pnpm exec prettier --write .` で整形（既存コードのスタイル統一として許容）。
 
 Run:
+
 ```bash
 pnpm exec eslint .
 ```
+
 Expected: エラー無しで終了（既存コードは strict スタイル準拠）。もし `@typescript-eslint/no-non-null-assertion` 等で軽微な指摘が出た場合は、該当箇所のみ最小限に対応（例: `draw_number` の `current.history.at(-1)!` は既存仕様。ルールが厳しすぎる場合は eslint.config.mjs の recommended に従い、必要時だけ行コメントで明示無効化）。
 
 - [ ] **Step 6: 既存のビルド・テスト・型チェックが通ることを確認**
 
 Run:
+
 ```bash
 pnpm typecheck && pnpm test && pnpm build
 ```
+
 Expected: すべて成功（lint 導入が既存挙動を壊していない）。
 
 - [ ] **Step 7: コミット**
@@ -285,6 +323,7 @@ git commit -m "chore: eslint + prettier + husky + lint-staged を導入"
 ## Task 3: `.apm/instructions/` 5本 ＋ `apm.yml` ＋ Copilot スタブを作成
 
 **Files:**
+
 - Create: `.apm/instructions/apm.instructions.md`
 - Create: `.apm/instructions/architecture.instructions.md`
 - Create: `.apm/instructions/widget.instructions.md`
@@ -305,21 +344,20 @@ applyTo: "{.apm/**,apm.yml,apm.lock.yaml}"
 
 ## Source of Truth
 
-`.apm/instructions/*.instructions.md` と `apm.yml` がすべての AI エージェント向け設定の Source of Truth。
-ここを編集することで Claude Code / Codex CLI / GitHub Copilot のすべてに同じ指示・MCP・プラグインが届く。
+`.apm/instructions/*.instructions.md` と `apm.yml` がすべての AI エージェント向け設定の Source of Truth。ここを編集することで Claude Code / Codex CLI / GitHub Copilot のすべてに同じ指示・MCP・プラグインが届く。
 
 ## ファイルの管理方針（追跡境界）
 
-| パス | 役割 | 追跡 |
-| --- | --- | --- |
-| `.apm/instructions/*.instructions.md` | 指示の SoT（人間が編集） | ✅ |
-| `apm.yml`（`dependencies.mcp` / `dependencies.apm`） | MCP・プラグインの SoT（人間が編集） | ✅ |
-| `apm.lock.yaml` | `apm install` 生成。整合性・再現性のため例外的に追跡 | ✅ |
-| `.github/copilot-instructions.md` | Copilot Code Review に SoT 所在を伝えるスタブ | ✅ |
-| `CLAUDE.md` / `AGENTS.md` | `apm compile` 生成 | ❌ |
-| `.claude/rules/` / `.github/instructions/` | `apm install` 生成（instructions 展開先） | ❌ |
-| `.mcp.json` / `.vscode/mcp.json` / `.codex/` | `apm install` 生成（MCP 設定 ＋ Codex プラグイン hooks） | ❌ |
-| `apm_modules/` / `.agents/skills/` / `.claude/{skills,commands,hooks,settings.json,apm-hooks.json}` / `.github/{prompts,hooks}` | プラグイン展開先 | ❌ |
+| パス                                                                                                                            | 役割                                                     | 追跡 |
+| ------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- | ---- |
+| `.apm/instructions/*.instructions.md`                                                                                           | 指示の SoT（人間が編集）                                 | ✅   |
+| `apm.yml`（`dependencies.mcp` / `dependencies.apm`）                                                                            | MCP・プラグインの SoT（人間が編集）                      | ✅   |
+| `apm.lock.yaml`                                                                                                                 | `apm install` 生成。整合性・再現性のため例外的に追跡     | ✅   |
+| `.github/copilot-instructions.md`                                                                                               | Copilot Code Review に SoT 所在を伝えるスタブ            | ✅   |
+| `CLAUDE.md` / `AGENTS.md`                                                                                                       | `apm compile` 生成                                       | ❌   |
+| `.claude/rules/` / `.github/instructions/`                                                                                      | `apm install` 生成（instructions 展開先）                | ❌   |
+| `.mcp.json` / `.vscode/mcp.json` / `.codex/`                                                                                    | `apm install` 生成（MCP 設定 ＋ Codex プラグイン hooks） | ❌   |
+| `apm_modules/` / `.agents/skills/` / `.claude/{skills,commands,hooks,settings.json,apm-hooks.json}` / `.github/{prompts,hooks}` | プラグイン展開先                                         | ❌   |
 
 ## ローカルでの作業
 
@@ -339,10 +377,10 @@ apm compile        # CLAUDE.md / AGENTS.md を更新
 - **プラグイン bundle**: Skills / commands / hooks 等をまとめたもの（例: `obra/superpowers`）
 - **単一プリミティブ (virtual file)**: 既存リポジトリ内の特定ファイルを 1 ファイル単位で取り込む（例: `github/awesome-copilot/instructions/code-review-generic.instructions.md`）
 
-| 依存 | 種別 | 用途 |
-| --- | --- | --- |
-| `code-review-generic.instructions.md`（github/awesome-copilot） | 単一プリミティブ | 汎用コードレビュー指示（ベンダー・言語非依存） |
-| `superpowers`（obra/superpowers） | marketplace plugin | TDD・デバッグ・計画立案等の汎用スキル群 |
+| 依存                                                            | 種別               | 用途                                           |
+| --------------------------------------------------------------- | ------------------ | ---------------------------------------------- |
+| `code-review-generic.instructions.md`（github/awesome-copilot） | 単一プリミティブ   | 汎用コードレビュー指示（ベンダー・言語非依存） |
+| `superpowers`（obra/superpowers）                               | marketplace plugin | TDD・デバッグ・計画立案等の汎用スキル群        |
 
 **vendor-neutral 方針**: 特定 AI ベンダー組織配下のリポジトリを直接指定せず、コミュニティ curated（`github/awesome-copilot`）や中立 OSS（`obra/superpowers`）を経由する。
 
@@ -350,11 +388,11 @@ apm compile        # CLAUDE.md / AGENTS.md を更新
 
 ## MCP サーバー（`dependencies.mcp`）
 
-| 名前 | 起動コマンド | 用途 | 前提 |
-| --- | --- | --- | --- |
-| `semgrep` | `uvx semgrep-mcp` | 静的解析（SAST） | `uv` |
-| `context7` | `npx -y @upstash/context7-mcp` | ライブラリ公式ドキュメント最新版取得 | `node` |
-| `serena` | `uvx --from git+https://github.com/oraios/serena@<sha> serena start-mcp-server` | LSP ベースのシンボル指向コード探索 | `uv` |
+| 名前       | 起動コマンド                                                                    | 用途                                 | 前提   |
+| ---------- | ------------------------------------------------------------------------------- | ------------------------------------ | ------ |
+| `semgrep`  | `uvx semgrep-mcp`                                                               | 静的解析（SAST）                     | `uv`   |
+| `context7` | `npx -y @upstash/context7-mcp`                                                  | ライブラリ公式ドキュメント最新版取得 | `node` |
+| `serena`   | `uvx --from git+https://github.com/oraios/serena@<sha> serena start-mcp-server` | LSP ベースのシンボル指向コード探索   | `uv`   |
 
 - **ピン方針**: git ソース（serena）は `@<sha>` でピン。npm/uvx の `semgrep` / `context7` は API 安定のため固定省略（解決状態は `apm.lock.yaml` に記録、将来必要なら `<pkg>@<semver>` で固定）。
 - `npx` は非対話起動のため `-y` を必ず付ける。
@@ -369,7 +407,7 @@ Copilot Code Review エージェントは `AGENTS.md` を読まず `.github/copi
 
 - [ ] **Step 2: `.apm/instructions/architecture.instructions.md` を作成**
 
-````markdown
+```markdown
 ---
 description: bingo_mcp のアーキテクチャ（責務分担・vendored 依存・乱数・状態検証境界・MCP ツール・状態権威）
 applyTo: "src/**"
@@ -379,9 +417,7 @@ applyTo: "src/**"
 
 ## 概要
 
-Claude のグラフィカルクライアント（claude.ai web / Claude Desktop）のチャット内で「ビンゴやりたい」と言うと、
-MCP Apps のウィジェットとしてビンゴ盤面（抽選機 ＋ 5×5 カード）が描画される。
-既存の `ROhta/bingo` のソースを**改変せず**再利用する。
+Claude のグラフィカルクライアント（claude.ai web / Claude Desktop）のチャット内で「ビンゴやりたい」と言うと、MCP Apps のウィジェットとしてビンゴ盤面（抽選機 ＋ 5×5 カード）が描画される。既存の `ROhta/bingo` のソースを**改変せず**再利用する。
 
 ## 3 層の責務分担
 
@@ -411,34 +447,32 @@ MCP Apps のウィジェットとしてビンゴ盤面（抽選機 ＋ 5×5 カ�
 
 `remain`/`history` の localStorage 出入りは非対称に検証する。
 
-| 方向 | 経路 | 検証 |
-| --- | --- | --- |
-| 書き込み（resume seed） | `seedLocalStorage` → `assertBingoNumbers`（`src/widget/hydrate.ts`） | **厳格**: 非配列・非整数・`[1,75]` 範囲外を throw |
-| 読み取り（resume restore） | `new NumberList()` の getter（vendored） | **寛容**: 非配列は黙って `[]` に縮退 |
+| 方向                       | 経路                                                                 | 検証                                              |
+| -------------------------- | -------------------------------------------------------------------- | ------------------------------------------------- |
+| 書き込み（resume seed）    | `seedLocalStorage` → `assertBingoNumbers`（`src/widget/hydrate.ts`） | **厳格**: 非配列・非整数・`[1,75]` 範囲外を throw |
+| 読み取り（resume restore） | `new NumberList()` の getter（vendored）                             | **寛容**: 非配列は黙って `[]` に縮退              |
 
 untrusted な入力はサーバー由来の `state`（MCP `structuredContent`）で、widget が localStorage に書き込む瞬間に `seedLocalStorage` が検証する（信頼境界＝入口）。widget が `new NumberList()` を作るのは常に seed 成功直後なので、寛容な読み取りが見るのは検証済みの自前データだけ。将来読み取り側にも厳格さが要るなら `assertBingoNumbers` 相当を読み取り口にも設けること。
 
 ## MCP ツール（`src/server/index.ts`）
 
-| ツール | 入力 | 挙動 |
-| --- | --- | --- |
-| `start_bingo` | `mode?: "resume" \| "fresh"` | 盤面を開く。`fresh` または未開始なら新規、既存があれば再開 |
-| `sync_state` | `state: GameState` | widget から状態を保存（抽選/マークの度に呼ばれる） |
-| `draw_number` | なし | 次の1つを抽選（チャットからの「次引いて」用）。枯渇時は「全て抽選済み」を返す |
-| `reset_game` | なし | ゲーム初期化 |
+| ツール        | 入力                         | 挙動                                                                          |
+| ------------- | ---------------------------- | ----------------------------------------------------------------------------- |
+| `start_bingo` | `mode?: "resume" \| "fresh"` | 盤面を開く。`fresh` または未開始なら新規、既存があれば再開                    |
+| `sync_state`  | `state: GameState`           | widget から状態を保存（抽選/マークの度に呼ばれる）                            |
+| `draw_number` | なし                         | 次の1つを抽選（チャットからの「次引いて」用）。枯渇時は「全て抽選済み」を返す |
+| `reset_game`  | なし                         | ゲーム初期化                                                                  |
 
 出力はすべて `gameStateShape`（`remain` / `history` / `card`）の `structuredContent`。
 
 ## 状態権威（C案）と単一盤面
 
-MCP Apps の View はターンごとに破棄・再生成され（`ui/resource-teardown`）、状態永続化 API は未定義。
-そのため **サーバーが平データのチェックポイント（`GameState`）を保持**し、widget が各 render で再シードして `NumberList` を実行、結果をサーバーへ同期する（C案）。
-現状は単一盤面ポリシー（`index.ts` の `let game`）。stateful HTTP 化（複数セッション分離）は将来課題。
-````
+MCP Apps の View はターンごとに破棄・再生成され（`ui/resource-teardown`）、状態永続化 API は未定義。そのため **サーバーが平データのチェックポイント（`GameState`）を保持**し、widget が各 render で再シードして `NumberList` を実行、結果をサーバーへ同期する（C案）。現状は単一盤面ポリシー（`index.ts` の `let game`）。stateful HTTP 化（複数セッション分離）は将来課題。
+```
 
 - [ ] **Step 3: `.apm/instructions/widget.instructions.md` を作成**
 
-````markdown
+```markdown
 ---
 description: widget の UI / ビルド方針（自前 CSS・CSP・mp3 インライン・esbuild）
 applyTo: "{src/widget/**,esbuild.mjs}"
@@ -463,7 +497,7 @@ applyTo: "{src/widget/**,esbuild.mjs}"
 - バンドル JS 内に `</script>` が現れると HTML パーサが script を早期終了するため、`</script>` → `<\/script>` にエスケープする。
 - テンプレート（`src/widget/index.html`）の `<!--BUNDLE-->` を **置換は関数で**渡して差し込む（文字列置換だと replacement 内の `$&`/`$\`` 等が特殊パターンと解釈され、バンドル中の正規表現エスケープが破損する）。
 - vendored mp3 alias（`@vendor/bingo/numberList`）は cwd 依存回避のため絶対パス化する（`vitest.config.ts` と同方式）。
-````
+```
 
 - [ ] **Step 4: `.apm/instructions/development.instructions.md` を作成**
 
@@ -500,8 +534,7 @@ pnpm test        # vitest
 
 ## MCP サーバーとしての起動
 
-`bin` の `bingo-mcp`（`dist/server/index.js`）は `StdioServerTransport` で動く stdio MCP サーバー。
-MCP ホスト（claude.ai web / Claude Desktop）に登録して使う。登録後、チャットで「ビンゴやりたい」と話しかけると widget が描画される。
+`bin` の `bingo-mcp`（`dist/server/index.js`）は `StdioServerTransport` で動く stdio MCP サーバー。MCP ホスト（claude.ai web / Claude Desktop）に登録して使う。登録後、チャットで「ビンゴやりたい」と話しかけると widget が描画される。
 
 ## Lint / 整形
 
@@ -537,9 +570,7 @@ applyTo: "**"
 
 ## ローカル開発ワークフロー（AI エージェント向け、superpowers ベース）
 
-[superpowers](https://github.com/obra/superpowers) 系スキル（`verification-before-completion` /
-`requesting-code-review` / `receiving-code-review` / `finishing-a-development-branch`）が利用可能であることを前提とする。
-利用できない場合はユーザーに案内し、本ワークフローを中断する。
+[superpowers](https://github.com/obra/superpowers) 系スキル（`verification-before-completion` / `requesting-code-review` / `receiving-code-review` / `finishing-a-development-branch`）が利用可能であることを前提とする。利用できない場合はユーザーに案内し、本ワークフローを中断する。
 
 実装完了と判断した時点で、以下を順に実行する（前ステップ完了まで次に進まない）:
 
@@ -550,8 +581,7 @@ applyTo: "**"
 
 ### PR レビュー応答ループ（git push 毎）
 
-`gh api graphql` で未 resolve なレビュースレッドを列挙する（`gh pr view --json reviews,comments` は `isResolved` を返さないので使わない）。
-`isResolved: false` かつ author が bot（例: `copilot-pull-request-reviewer[bot]`）のスレッドを対象に:
+`gh api graphql` で未 resolve なレビュースレッドを列挙する（`gh pr view --json reviews,comments` は `isResolved` を返さないので使わない）。 `isResolved: false` かつ author が bot（例: `copilot-pull-request-reviewer[bot]`）のスレッドを対象に:
 
 - **妥当な指摘**: 修正 → コミット → 該当インラインコメントに返信（本文に対応コミット SHA を**前後半角空白付き**で記載しリンク化）→ スレッドを resolve。
 - **不当と判断**: コードは変更せず、理由を日本語で具体的に記載 → resolve。
@@ -649,6 +679,7 @@ git commit -m "feat: APM 指示書5本・apm.yml・Copilot スタブを追加（
 ## Task 4: `apm install` 実行・dedupe 要否判定・`apm.lock.yaml` 追跡
 
 **Files:**
+
 - 生成（追跡）: `apm.lock.yaml`
 - Create（条件付き）: `scripts/dedupe-apm-lock.mjs`
 - Modify（条件付き）: `package.json`（`apm-install` script）
@@ -656,26 +687,32 @@ git commit -m "feat: APM 指示書5本・apm.yml・Copilot スタブを追加（
 - [ ] **Step 1: `apm install` を実行**
 
 Run:
+
 ```bash
 apm install
 ```
+
 Expected: `apm_modules/` にダウンロード、`.claude/rules/` / `.github/instructions/` / `.mcp.json` / `.vscode/mcp.json` / `.codex/` / skills 等が生成、`apm.lock.yaml` が生成される。`unpinned` 警告が出たら `apm.yml` の該当依存を `apm.lock.yaml` の `resolved_commit` で `#<sha>` ピンして再実行。
 
 - [ ] **Step 2: lockfile の重複バグ（v0.14.1 の既知問題）が 0.19.0 で再現するか確認**
 
 Run:
+
 ```bash
 grep -nE '^([ \t]*-[ \t]+.+)$' apm.lock.yaml | awk '{print $0}' | sort | uniq -d | head
 # より厳密に「隣接行の重複」を検出
 awk 'prev==$0 && $0 ~ /^[ \t]*-[ \t]+/ {print NR": "$0} {prev=$0}' apm.lock.yaml
 ```
+
 Expected:
+
 - **重複が無い**（出力なし）→ dedupe スクリプトは**不要**。Step 3a へ。
 - **重複がある** → Step 3b へ（dedupe スクリプト導入）。
 
 - [ ] **Step 3a:（重複が無い場合）`apm-install` script を素の apm install で追加**
 
 `package.json` の `scripts` に追加:
+
 ```json
 "apm-install": "apm install"
 ```
@@ -683,6 +720,7 @@ Expected:
 - [ ] **Step 3b:（重複がある場合のみ）dedupe スクリプトを導入**
 
 `scripts/dedupe-apm-lock.mjs` を作成:
+
 ```js
 #!/usr/bin/env node
 // APM CLI が apm.lock.yaml の `deployed_files:` 配列に同一パスを 2 回出力する不具合への
@@ -710,22 +748,27 @@ console.log(`${PATH}: removed ${removed} duplicate line(s).`)
 ```
 
 `package.json` の `scripts` に追加:
+
 ```json
 "apm-install": "apm install && node scripts/dedupe-apm-lock.mjs"
 ```
 
 Run（dedupe を一度かける）:
+
 ```bash
 node scripts/dedupe-apm-lock.mjs
 ```
+
 Expected: 重複行が除去される。`apm.instructions.md` の「ローカルでの作業」節と整合（必要なら注記を追記）。
 
 - [ ] **Step 4: 生成物が追跡されないことを確認**
 
 Run:
+
 ```bash
 git status --porcelain | grep -E '(^|\s)(CLAUDE\.md|AGENTS\.md|\.claude/|\.github/instructions/|\.mcp\.json|\.vscode/mcp\.json|\.codex/|apm_modules/)' && echo "!! 生成物が見えている（gitignore 漏れ）" || echo "生成物は追跡対象外 (OK)"
 ```
+
 Expected: `生成物は追跡対象外 (OK)`。
 
 - [ ] **Step 5: コミット**
@@ -746,36 +789,44 @@ git commit -m "chore: apm install で apm.lock.yaml を生成・追跡（apm-ins
 - [ ] **Step 1: `apm compile` を実行**
 
 Run:
+
 ```bash
 apm compile
 ```
+
 Expected: `CLAUDE.md` / `AGENTS.md` が生成される。
 
 - [ ] **Step 2: 生成物に 5 本の指示内容が反映されていることを確認**
 
 Run:
+
 ```bash
 for kw in "APM 運用ルール" "アーキテクチャと実装方針" "Widget の UI" "開発環境" "ワークフロー"; do
   grep -q "$kw" CLAUDE.md AGENTS.md && echo "OK: $kw" || echo "MISSING: $kw"
 done
 ```
+
 Expected: すべて `OK`。
 
 - [ ] **Step 3: MCP 設定が 3 サーバーを含むことを確認**
 
 Run:
+
 ```bash
 for s in semgrep context7 serena; do grep -q "$s" .mcp.json && echo "OK: $s" || echo "MISSING: $s"; done
 grep -q chrome-devtools .mcp.json && echo "!! chrome-devtools が混入" || echo "chrome-devtools 不在 (OK)"
 ```
+
 Expected: 3 サーバーすべて `OK`、chrome-devtools 不在。
 
 - [ ] **Step 4: 生成物が git status に現れないことを再確認**
 
 Run:
+
 ```bash
 git status --short
 ```
+
 Expected: 追跡対象（次の Task で触る README 等）以外は何も出ない。`CLAUDE.md` / `AGENTS.md` / `.mcp.json` / `.codex/` 等が `??` で出ないこと。
 
 ---
@@ -783,6 +834,7 @@ Expected: 追跡対象（次の Task で触る README 等）以外は何も出�
 ## Task 6: README を薄化（濃い設計内容は指示書へ移設済み）
 
 **Files:**
+
 - Modify: `README.md`（全面置換）
 
 - [ ] **Step 1: `README.md` を以下の内容で置き換える**
@@ -798,13 +850,13 @@ bingo を MCP Apps で呼ぶ。チャットで「ビンゴやりたい」と言�
 
 プロジェクトに関する指示・設計（アーキテクチャ・乱数の公平性・状態検証境界・運用ルール）は AI エージェント向け指示と共通化し、[`.apm/instructions/`](.apm/instructions/) 配下に集約している。これらは [microsoft/apm](https://github.com/microsoft/apm)（Agent Package Manager）で管理され、`apm compile` で Claude Code / Codex / GitHub Copilot 向けファイル（`CLAUDE.md` / `AGENTS.md` / `.claude/rules/` / `.github/instructions/`）に展開される。
 
-| ファイル | 内容 |
-| --- | --- |
-| [`apm`](.apm/instructions/apm.instructions.md) | APM 運用ルール（SoT・追跡境界・MCP 依存・プラグイン） |
+| ファイル                                                         | 内容                                                                      |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| [`apm`](.apm/instructions/apm.instructions.md)                   | APM 運用ルール（SoT・追跡境界・MCP 依存・プラグイン）                     |
 | [`architecture`](.apm/instructions/architecture.instructions.md) | 責務分担・vendored 依存・乱数と公平性・状態検証境界・MCP ツール・状態権威 |
-| [`widget`](.apm/instructions/widget.instructions.md) | widget の UI/ビルド（CSS・CSP・mp3 インライン・esbuild） |
-| [`development`](.apm/instructions/development.instructions.md) | 環境構築・ビルド・lint・起動 |
-| [`workflow`](.apm/instructions/workflow.instructions.md) | 開発フロー・AI ワークフロー・PR レビュー・GitHub 運用 |
+| [`widget`](.apm/instructions/widget.instructions.md)             | widget の UI/ビルド（CSS・CSP・mp3 インライン・esbuild）                  |
+| [`development`](.apm/instructions/development.instructions.md)   | 環境構築・ビルド・lint・起動                                              |
+| [`workflow`](.apm/instructions/workflow.instructions.md)         | 開発フロー・AI ワークフロー・PR レビュー・GitHub 運用                     |
 
 ## 開発
 
@@ -839,28 +891,34 @@ git commit -m "docs: README を薄化し .apm/instructions/ への索引に再�
 - [ ] **Step 1: ビルド・テスト・型チェック・lint がすべて通る**
 
 Run:
+
 ```bash
 pnpm install --frozen-lockfile
 pnpm typecheck && pnpm test && pnpm build && pnpm exec eslint .
 ```
+
 Expected: すべて成功。
 
 - [ ] **Step 2: 追跡対象が想定どおりであることを確認**
 
 Run:
+
 ```bash
 git status --short
-git ls-files | grep -E '^(apm\.yml|apm\.lock\.yaml|\.apm/|\.github/copilot-instructions\.md|eslint\.config\.mjs|\.husky/pre-commit)' 
+git ls-files | grep -E '^(apm\.yml|apm\.lock\.yaml|\.apm/|\.github/copilot-instructions\.md|eslint\.config\.mjs|\.husky/pre-commit)'
 ```
+
 Expected: 作業ツリーはクリーン。SoT・lock・lint 設定が追跡されている。生成物（`CLAUDE.md` / `.claude/rules/` / `.mcp.json` / `.codex/` 等）は出ない。
 
 - [ ] **Step 3: `pnpm apm-install` の冪等性確認**
 
 Run:
+
 ```bash
 pnpm apm-install
 git status --short
 ```
+
 Expected: 再実行しても `apm.lock.yaml` に差分が出ない（dedupe 導入時も安定）。差分が出るなら lockfile 安定性を調査。
 
 - [ ] **Step 4: PR 作成**

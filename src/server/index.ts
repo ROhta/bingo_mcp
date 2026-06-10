@@ -86,8 +86,7 @@ registerAppTool(
 	"draw_number",
 	{
 		title: "番号を抽選",
-		description:
-			"次の番号を1つ抽選する（チャットからの「次引いて」用）。引いた番号はカードにあれば自動でマークされる。ユーザーにタップを促さず、戻り文（カードにあったか・リーチ/ビンゴ）をそのまま伝えること。",
+		description: "次の番号を1つ抽選する（チャットからの「次引いて」用）。引いた番号はカードにあれば自動でマークされる。ユーザーにタップを促さず、戻り文（カードにあったか・リーチ/ビンゴ）をそのまま伝えること。",
 		inputSchema: {},
 		outputSchema: gameStateShape,
 		_meta: {ui: {resourceUri: RESOURCE_URI}},

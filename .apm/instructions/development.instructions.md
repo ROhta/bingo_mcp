@@ -37,6 +37,7 @@ pnpm test        # vitest
 - eslint と prettier が git commit 時に husky `pre-commit` ＋ lint-staged で発火する。
 - prettier 設定と lint-staged 設定は `package.json` に集約（一覧性優先、設定ファイルを増やさない）。
 - eslint は独自ルールを最小化し recommend 準拠（`eslint.config.mjs`、flat config）。widget=browser / server=node でディレクトリ別に globals を当てる。
+- **eslint / vitest は `.gitignore` を見ない**ため、APM 生成物（`.claude/` `.agents/` `.codex/` `.github/`）と `apm_modules/`・`vendor/` を明示的に探索対象外にすること（eslint は `ignores`、vitest は `include: ["src/**/*.test.ts"]` で自前テストに限定）。これを怠ると `apm install` 後に生成物が lint/test されて大量に失敗する。prettier はデフォルトで `.gitignore` を尊重するため別途 `.prettierignore` で補う。
 
 ## tsconfig
 

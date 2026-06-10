@@ -209,7 +209,9 @@ import globals from "globals"
 
 export default tseslint.config(
 	{
-		ignores: ["node_modules/**", "dist/**", "vendor/**", "apm_modules/**", ".remember/**"],
+		// APM 生成物（.claude/.agents/.codex/.github）と vendored/ビルド成果物は探索対象外。
+		// eslint は .gitignore を見ないため明示除外が必要（apm install 後に生成物が lint されるのを防ぐ）。
+		ignores: ["node_modules/**", "dist/**", "vendor/**", "apm_modules/**", ".remember/**", ".claude/**", ".agents/**", ".codex/**", ".github/**"],
 	},
 	js.configs.recommended,
 	...tseslint.configs.recommended,
@@ -256,6 +258,17 @@ apm_modules
 .remember
 pnpm-lock.yaml
 ```
+
+- [ ] **Step 2c: `vitest.config.ts` のテスト探索を自前テストに限定**
+
+vitest は `.gitignore` を見ないため、`apm install` 後に APM 生成物（`apm_modules/` 同梱の `*.test.*` 等）を拾って失敗する。`test.include` を `src` 配下に絞る。
+
+```ts
+// test: {environment: "node"} を以下に変更
+test: {environment: "node", include: ["src/**/*.test.ts"]},
+```
+
+> 注（統合上の注意）: eslint の `ignores` にも APM 生成物（`.claude/.agents/.codex/.github`）を加える（Step 2 のコメント参照）。prettier はデフォルトで `.gitignore` を尊重するため `.prettierignore` のみで足りるが、eslint / vitest は `.gitignore` 非尊重なので個別に除外が必要。この除外を怠ると Task 4（`apm install`）以降で lint/test が大量失敗する。
 
 - [ ] **Step 3: 依存をインストール**
 

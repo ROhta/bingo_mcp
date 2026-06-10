@@ -5,7 +5,9 @@ import globals from "globals"
 
 export default tseslint.config(
 	{
-		ignores: ["node_modules/**", "dist/**", "vendor/**", "apm_modules/**", ".remember/**"],
+		// APM 生成物（apm install 展開先）と vendored/ビルド成果物は探索対象外。
+		// eslint は .gitignore を見ないため明示除外が必要（これらは .gitignore 済みだが lint されてしまう）。
+		ignores: ["node_modules/**", "dist/**", "vendor/**", "apm_modules/**", ".remember/**", ".claude/**", ".agents/**", ".codex/**", ".github/**"],
 	},
 	js.configs.recommended,
 	...tseslint.configs.recommended,

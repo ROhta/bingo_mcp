@@ -496,7 +496,7 @@ applyTo: "{src/widget/**,esbuild.mjs}"
 - `src/widget/main.ts` を起点に iife 形式で単一 HTML（`dist/mcp-app.html`）へバンドルし、`ui://` リソースとして配信する。
 - バンドル JS 内に `</script>` が現れると HTML パーサが script を早期終了するため、`</script>` → `<\/script>` にエスケープする。
 - テンプレート（`src/widget/index.html`）の `<!--BUNDLE-->` を **置換は関数で**渡して差し込む（文字列置換だと replacement 内の `$&`/`$\`` 等が特殊パターンと解釈され、バンドル中の正規表現エスケープが破損する）。
-- vendored mp3 alias（`@vendor/bingo/numberList`）は cwd 依存回避のため絶対パス化する（`vitest.config.ts` と同方式）。
+- vendored モジュール alias（`@vendor/bingo/numberList` ＝ `NumberList` の TS ソース）は cwd 依存回避のため絶対パス化する（`esbuild.mjs` / `vitest.config.ts` 同方式）。mp3 は alias ではなく上記 `loader: {".mp3": "dataurl"}` で取り込む点に注意。
 ```
 
 - [ ] **Step 4: `.apm/instructions/development.instructions.md` を作成**

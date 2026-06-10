@@ -62,8 +62,8 @@ bingo と同じ境界を敷く。
 | `.github/instructions/*.instructions.md` | `apm install` 生成物（Copilot 新形式） | ❌ 追跡しない |
 | `.mcp.json` | `apm install` 生成物（Claude Code MCP 設定） | ❌ 追跡しない |
 | `.vscode/mcp.json` | `apm install` 生成物（Copilot in VS Code MCP 設定） | ❌ 追跡しない |
-| `.codex/config.toml` | `apm install` 生成物（Codex CLI MCP 設定） | ❌ 追跡しない |
-| `apm_modules/`, `.agents/skills/`, `.claude/skills/`, `.claude/commands/`, `.claude/hooks/`, `.claude/settings.json`, `.claude/apm-hooks.json`, `.github/prompts/`, `.github/hooks/` | APM プラグイン展開先 | ❌ 追跡しない |
+| `.codex/`（`config.toml` ＋ `hooks/`） | `apm install` 生成物（Codex CLI MCP 設定 ＋ プラグイン由来のフック。例: superpowers の `.codex/hooks/superpowers/hooks/run-hook.cmd`） | ❌ 追跡しない |
+| `apm_modules/`, `.agents/skills/`, `.claude/skills/`, `.claude/commands/`, `.claude/hooks/`, `.claude/settings.json`, `.claude/apm-hooks.json`, `.codex/hooks/`, `.github/prompts/`, `.github/hooks/` | APM プラグイン展開先 | ❌ 追跡しない |
 
 ### `.gitignore` への追記
 
@@ -77,10 +77,10 @@ CLAUDE.md
 AGENTS.md
 .claude/rules/
 .github/instructions/
-# MCP 設定生成物
+# MCP 設定生成物 ＋ Codex プラグイン hooks
 .mcp.json
 .vscode/mcp.json
-.codex/config.toml
+.codex/                  # config.toml(MCP 設定) と hooks/(プラグイン由来) の両方を包含
 # APM プラグイン展開先
 apm_modules/
 .agents/skills/
@@ -140,8 +140,12 @@ dependencies:
 ```
 
 - chrome-devtools は除外。
-- MCP / APM とも **SHA ピン**（ドリフト防止）。`<SHA>` は実装時に `apm install` の解決結果
-  （`apm.lock.yaml` の `resolved_commit`）で確定する。bingo の現行 SHA を初期値の参考にしてよい。
+- **ピン方針**（ドリフト防止）:
+  - **APM パッケージ（`dependencies.apm`）は SHA ピン必須**。`<SHA>` は実装時に `apm install` の
+    解決結果（`apm.lock.yaml` の `resolved_commit`）で確定する。bingo の現行 SHA を初期値の参考にしてよい。
+  - **MCP（`dependencies.mcp`）は git ソースの serena のみ SHA ピン**（`git+URL@<SHA>`）。
+    npm/uvx パッケージの `semgrep`・`context7` は API が安定しているため**固定省略**し、
+    解決状態は `apm.lock.yaml` に記録される（将来必要になれば `<pkg>@<semver>` で固定）。bingo の方針を踏襲。
 - APM 公式レジストリ（`apm mcp search` / `apm mcp install <registry-name>`）は解決不正の既知問題が
   あるため使わず、**すべて self-defined（`-- <command> [args...]`）**で登録する（bingo の方針を踏襲）。
 

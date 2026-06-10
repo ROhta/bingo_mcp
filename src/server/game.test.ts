@@ -12,11 +12,7 @@ function cardWith(markedValues: number[]): Card {
 		[46, 47, 48, 49, 50],
 		[61, 62, 63, 64, 65],
 	]
-	return base.map((col, c) =>
-		col.map((value, r) =>
-			c === 2 && r === 2 ? {value: "FREE" as const, marked: true} : {value, marked: markedValues.includes(value)},
-		),
-	)
+	return base.map((col, c) => col.map((value, r) => (c === 2 && r === 2 ? {value: "FREE" as const, marked: true} : {value, marked: markedValues.includes(value)})))
 }
 
 describe("freshGame", () => {

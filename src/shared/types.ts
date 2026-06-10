@@ -12,10 +12,7 @@ export type RowColIndex = 0 | 1 | 2 | 3 | 4
 export type DiagIndex = 0 | 1
 
 /** row/col は index 0..4。diag は 0=左上→右下, 1=右上→左下。範囲を型で縛る。 */
-export type Line =
-	| {kind: "row"; index: RowColIndex}
-	| {kind: "col"; index: RowColIndex}
-	| {kind: "diag"; index: DiagIndex}
+export type Line = {kind: "row"; index: RowColIndex} | {kind: "col"; index: RowColIndex} | {kind: "diag"; index: DiagIndex}
 
 export interface Judgement {
 	bingoLines: Line[]

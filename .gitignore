@@ -141,3 +141,24 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# APM (microsoft/apm) 生成物 — `apm install`/`apm compile` で再生成されるため追跡しない
+# instructions / メモリの生成先
+CLAUDE.md
+AGENTS.md
+.claude/rules/
+.github/instructions/
+# MCP 設定生成物 ＋ Codex プラグイン hooks（.codex/ はディレクトリ丸ごと: config.toml と hooks/ の両方）
+.mcp.json
+.vscode/mcp.json
+.codex/
+# APM プラグイン展開先
+apm_modules/
+.agents/skills/
+.claude/skills/
+.claude/commands/
+.claude/hooks/
+.claude/apm-hooks.json
+.claude/settings.json
+.github/prompts/
+.github/hooks/

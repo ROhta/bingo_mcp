@@ -85,7 +85,7 @@ mise 採用に伴い、以下の Source of Truth（`.apm/instructions/`）と RE
 
 - **`mise trust`**: `mise.toml` はセキュリティ上、初回に `mise trust` が必要（未 trust だと mise は設定を読まない）。setup 手順に含める。
 - **PATH 反映**: ツールを PATH に乗せるにはシェルで mise を activate（`mise activate <shell>`）するか、`mise exec -- <cmd>` 経由で実行する。
-- **husky pre-commit との関係**: `.husky/pre-commit` は `pnpm exec lint-staged` を実行する。これはシェルで mise が activate 済みであることを前提とする。mise 非 activate 環境（一部 GUI git クライアント等）では `pnpm` が解決されずフックが失敗し得る点に注意（必要なら将来 `mise exec -- pnpm ...` 化を検討。本件では既存どおりとし注記に留める）。
+- **husky pre-commit との関係（実装で確定）**: corepack 廃止で `pnpm` がシェル PATH から消えるため、`.husky/pre-commit` は **`mise exec -- pnpm exec lint-staged`** に変更する（当初案の素の `pnpm exec lint-staged` は mise 非 activate 環境で `pnpm` 未解決となりコミットが失敗する。実装中に実際に code 127 で再現）。`mise exec` はフックの最小 PATH 上の `mise`（`~/.local/bin/mise`）から `mise.toml` のツールを解決するため、シェル activate に依存しない。前提として `mise trust` 済みであること。
 - **既存の手動 apm（`/usr/local/bin/apm`）**: mise activate 時は mise の shim が PATH 優先になるため共存して問題ない。手動版の撤去は任意（本スコープ外）。
 
 ## 7. 検証計画（実装フェーズ）
@@ -104,4 +104,5 @@ mise 採用に伴い、以下の Source of Truth（`.apm/instructions/`）と RE
 - `.gitignore`（`mise.local.toml` ＋ `.mise.local.toml` を追記）
 - `.apm/instructions/development.instructions.md`（SoT 更新）
 - `.apm/instructions/apm.instructions.md`（SoT 更新）
+- `.husky/pre-commit`（`mise exec -- pnpm exec lint-staged` に変更。corepack 廃止対応）
 - `README.md`（開発節の更新）

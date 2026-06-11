@@ -1,1 +1,2 @@
-pnpm exec lint-staged
+# corepack 廃止により pnpm は mise 管理。シェル activate に依存せず mise 経由で解決する。
+mise exec -- pnpm exec lint-staged

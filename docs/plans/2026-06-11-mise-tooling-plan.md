@@ -23,14 +23,15 @@
 
 ## ファイル構成（作成・変更一覧）
 
-| パス                                            | 操作             | 責務                                                                        |
-| ----------------------------------------------- | ---------------- | --------------------------------------------------------------------------- |
-| `mise.toml`                                     | 作成             | node/pnpm/apm のバージョン固定（[tools]）＋ lockfile 有効化（[settings]）   |
-| `mise.lock`                                     | 生成（追跡）     | 解決バージョン＋チェックサム固定（再現性）                                  |
-| `.gitignore`                                    | 変更（末尾追記） | `mise.local.toml` ＋ `.mise.local.toml`（個人オーバーライド）を追跡対象外に |
-| `.apm/instructions/development.instructions.md` | 変更             | 前提ツール・環境構築を corepack→mise に更新（SoT）                          |
-| `.apm/instructions/apm.instructions.md`         | 変更             | apm CLI が mise 管理である旨を追記（SoT）                                   |
-| `README.md`                                     | 変更             | 「## 開発」の `corepack enable` を `mise trust && mise install` に置換      |
+| パス                                            | 操作             | 責務                                                                          |
+| ----------------------------------------------- | ---------------- | ----------------------------------------------------------------------------- |
+| `mise.toml`                                     | 作成             | node/pnpm/apm のバージョン固定（[tools]）＋ lockfile 有効化（[settings]）     |
+| `mise.lock`                                     | 生成（追跡）     | 解決バージョン＋チェックサム固定（再現性）                                    |
+| `.gitignore`                                    | 変更（末尾追記） | `mise.local.toml` ＋ `.mise.local.toml`（個人オーバーライド）を追跡対象外に   |
+| `.apm/instructions/development.instructions.md` | 変更             | 前提ツール・環境構築を corepack→mise に更新（SoT）                            |
+| `.apm/instructions/apm.instructions.md`         | 変更             | apm CLI が mise 管理である旨を追記（SoT）                                     |
+| `README.md`                                     | 変更             | 「## 開発」の `corepack enable` を `mise trust && mise install` に置換        |
+| `.husky/pre-commit`                             | 変更             | corepack 廃止で pnpm 未解決になるため `mise exec -- pnpm exec lint-staged` に |
 
 ---
 
@@ -202,7 +203,9 @@ Expected: `regenerated` ＋ `no leak (OK)`（生成物は gitignore 済みで追
 - [ ] **Step 5: コミット**
 
 ```bash
-git add .apm/instructions/development.instructions.md .apm/instructions/apm.instructions.md
+# SoT 指示書を編集すると apm install で再生成された .claude/rules・.github/instructions の
+# 内容ハッシュが変わり apm.lock.yaml の local_deployed_file_hashes も更新されるため、一緒にコミットする。
+git add .apm/instructions/development.instructions.md .apm/instructions/apm.instructions.md apm.lock.yaml
 git commit -m "docs(apm): 開発前提ツールを corepack から mise に更新（SoT）"
 ```
 

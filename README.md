@@ -20,7 +20,7 @@ bingo を MCP Apps で呼ぶ。チャットで「ビンゴやりたい」と言�
 
 ```sh
 git submodule update --init   # vendor/bingo を取得
-corepack enable
+mise trust && mise install    # node / pnpm / apm を取得（mise.toml で固定）
 pnpm install --frozen-lockfile
 
 pnpm test       # vitest

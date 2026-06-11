@@ -4,9 +4,9 @@
 
 **Goal:** node / pnpm / apm を [mise](https://mise.jdx.dev)（`mise.toml`）で完全固定し、`mise install` 一発で再現可能にする（corepack 廃止）。
 
-**Architecture:** `mise.toml`（[tools] に node 24.16.0 / pnpm 11.2.2 / `ubi:microsoft/apm` 0.19.0、[settings] lockfile=true）を SoT とし、`mise.lock` でチェックサム固定。corepack 廃止に伴い `.apm/instructions/`（development / apm）と README の手順を mise ベースに更新する。
+**Architecture:** `mise.toml`（[tools] に node 24.16.0 / pnpm 11.2.2 / `github:microsoft/apm` 0.19.0、[settings] lockfile=true）を SoT とし、`mise.lock`（`mise lock` で生成）でチェックサム固定。corepack 廃止に伴い `.apm/instructions/`（development / apm）と README の手順を mise ベースに更新する。
 
-**Tech Stack:** mise 2026.6.1（ubi backend / core:node / aqua:pnpm）、pnpm 11.2.2、node 24.16.0、apm 0.19.0。
+**Tech Stack:** mise 2026.6.1（github backend / core:node / aqua:pnpm）、pnpm 11.2.2、node 24.16.0、apm 0.19.0。
 
 **設計書:** `docs/specs/2026-06-11-mise-tooling-design.md`（PR #13）
 
@@ -15,8 +15,8 @@
 ## 重要な前提・順序制約
 
 - mise は導入済み（`mise --version` → 2026.6.1）。ブランチ `docs/mise-tooling-design` 上で作業（PR #13、push して継続）。
-- **apm は mise registry 未登録**のため `ubi:microsoft/apm` とフル指定する。リリースアセットは `apm-linux-x86_64.tar.gz` 等の標準命名（ubi 自動判定可、`v` プレフィックス自動処理）。
-- 実装時の2つの検証ポイント（設計書 §3）: ①`ubi` が tarball から `apm` 実行ファイルを展開できるか（ダメなら `exe`/`extract_all` オプション） ②`[settings] lockfile=true` がローカル `mise.toml` から効くか（`mise.lock` が生成されるか）。
+- **apm は mise registry 未登録**のため `github:microsoft/apm` とフル指定する。**`ubi:` は不可**: apm は PyInstaller バンドル（`_internal/` 配下の共有ライブラリを要する複数ファイル）で、`ubi:` は単一バイナリしか展開せず実行時に壊れる。`github:` は tarball 全体を展開する（mise 2026.6.1 は ubi を deprecated とし github 推奨）。
+- **`mise.lock` は `mise lock` を明示実行して生成**する（`[settings] lockfile=true` ＋ `mise install` だけでは自動生成されない）。
 - PATH 非依存に検証するため、バージョン確認は `mise exec -- <cmd>` 経由で行う（シェルの mise activate 状態に依存しない）。
 
 ---
@@ -66,7 +66,7 @@ Expected: いずれも成功。ブランチが違う場合は `git checkout docs
 [tools]
 node = "24.16.0"
 pnpm = "11.2.2"
-"ubi:microsoft/apm" = "0.19.0"
+"github:microsoft/apm" = "0.19.0"
 
 [settings]
 lockfile = true
@@ -106,41 +106,24 @@ mise exec -- apm --version       # Expected: ...version 0.19.0...
 
 Expected: 3つとも一致。`apm --version` が「command not found」や別バージョンなら Step 5 へ。
 
-- [ ] **Step 5: （apm 展開が失敗した場合のみ）ubi オプションを付与**
+- [ ] **Step 5: apm が `github:` backend で動くこと（ubi は不可）**
 
-`ubi` が tarball 内の `apm` 実行ファイルを特定できない場合、`mise.toml` の該当行を以下に変更して `mise install` を再実行する。
+apm backend は **`github:`** を使う（Step 1 で指定済み）。`ubi:` は使わないこと。理由: apm は PyInstaller バンドルで、実行に `_internal/libpython3.12.so.1.0` 等の同梱共有ライブラリを要する。`ubi:` は tarball の単一トップレベルバイナリしか展開しないため、起動時に `libpython3.12.so.1.0` 欠落で壊れる（この症状が出たら ubi を使っている）。`github:` は tarball 全体（`_internal/` 含む）を展開する。mise 2026.6.1 は `ubi:` を deprecated とし `github:` を推奨する。
 
-```toml
-"ubi:microsoft/apm" = { version = "0.19.0", exe = "apm" }
-```
+Step 4 の `mise exec -- apm --version` が 0.19.0 を返せば OK。
 
-それでも失敗する場合は `extract_all = true` を併用:
+- [ ] **Step 6: `mise.lock` を生成（`mise lock` を明示実行）**
 
-```toml
-"ubi:microsoft/apm" = { version = "0.19.0", exe = "apm", extract_all = true }
-```
-
-再度 Step 4 の `mise exec -- apm --version` で 0.19.0 を確認する。
-
-- [ ] **Step 6: `mise.lock` が生成されたか確認（lockfile setting の honored 検証）**
+`[settings] lockfile = true` を置いても `mise install` だけでは `mise.lock` は自動生成されない。`mise lock` で明示生成する。
 
 Run:
 
 ```bash
-ls -l mise.lock && echo "lockfile exists" || echo "NO lockfile"
+mise lock                                   # mise.lock を生成/更新
+ls -l mise.lock && echo "lockfile exists"   # 生成確認
 ```
 
-Expected: `lockfile exists`、かつ中に node/pnpm/apm の解決バージョンとチェックサムが記録されている（`cat mise.lock` で確認）。
-
-`NO lockfile` の場合（ローカル `[settings]` が honored されない）、グローバルに有効化して再生成する:
-
-```bash
-mise settings set lockfile true
-rm -f mise.lock && mise install
-ls -l mise.lock   # 再確認
-```
-
-（この場合 `mise.toml` の `[settings] lockfile=true` は「意図の明示」として残す。）
+Expected: `mise.lock` が生成され、node / pnpm / `github:microsoft/apm` の解決バージョンと各プラットフォームの sha256 チェックサムが記録されている（`cat mise.lock` で確認、少なくとも実行環境の linux-x64 エントリがあること）。`mise.toml` の `[settings] lockfile=true` は意図マーカーとして残す。コミット済み `mise.lock` があれば各環境の `mise install` がそれを参照して再現する。
 
 - [ ] **Step 7: コミット**
 
@@ -202,7 +185,7 @@ pnpm install --frozen-lockfile
 「`apm.lock.yaml` を除く生成物は `.gitignore` 対象のためコミットには含まれない。」の直後に、以下の段落を追加する。
 
 ```markdown
-> apm CLI 自体は **mise 管理**（`mise.toml` の `ubi:microsoft/apm`、バージョン固定）。`mise install` で導入される。
+> apm CLI 自体は **mise 管理**（`mise.toml` の `github:microsoft/apm`、バージョン固定）。`mise install` で導入される。
 ```
 
 - [ ] **Step 4: 生成物を再生成して整合を確認**
@@ -344,11 +327,11 @@ git push origin docs/mise-tooling-design
 ## 自己レビュー結果（spec 突き合わせ）
 
 - **spec §3 mise.toml（node/pnpm/apm + lockfile）** → Task 1 Step 1。
-- **spec §3 apm=ubi / 実装検証点（ubi 展開・lockfile honored）** → Task 1 Step 4-6（フォールバック明記）。
+- **spec §3 apm=github（ubi は PyInstaller バンドルを壊すため不可）/ lockfile は `mise lock`** → Task 1 Step 4-6。
 - **spec §4 mise.lock 採用** → Task 1 Step 6、Task 4 Step 2（冪等）。
 - **spec §5 corepack 廃止・SoT/README 更新** → Task 2（development/apm）、Task 3（README）。
 - **spec §6 運用注意（trust/activate/PATH）** → development 指示書（Task 2 Step 1）に明記。
 - **spec §7 検証計画** → Task 4。
 - **spec §8 成果物一覧** → 全ファイル網羅（mise.toml/mise.lock/.gitignore/development/apm/README）。
-- **placeholder 無し**: `<repo>` はコマンド例示。ubi/lockfile の不確実点は「検証→フォールバック」手順化（TBD ではない）。
+- **placeholder 無し**: `<repo>` はコマンド例示。apm backend は `github:`、lockfile は `mise lock` で生成（実装で確定）。
 - **非スコープ厳守**: `engines`/`packageManager` 追加せず、uv は mise 管理に含めず、CI は触らない。

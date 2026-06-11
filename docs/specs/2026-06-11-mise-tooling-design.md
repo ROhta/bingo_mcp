@@ -95,13 +95,13 @@ mise 採用に伴い、以下の Source of Truth（`.apm/instructions/`）と RE
 3. `ubi:microsoft/apm` が `apm` 実行ファイルを正しく展開し、`apm install` / `apm compile` が従来どおり動作する。
 4. `pnpm install --frozen-lockfile` / `pnpm typecheck` / `pnpm test` / `pnpm build` / `pnpm exec eslint .` / `pnpm exec prettier --check .` が全て通る。
 5. corepack 無効環境でも上記が成立する（mise-managed pnpm のみで完結）。
-6. `.gitignore` に `mise.local.toml`（個人オーバーライド）を追加し、追跡されないこと。
+6. `.gitignore` に `mise.local.toml`（および dot-prefix 版 `.mise.local.toml`）を追加し、追跡されないこと。mise は両形式を local override として認識する。
 
 ## 8. 成果物一覧（新規追跡・変更）
 
 - `mise.toml`（新規）
 - `mise.lock`（新規・生成物だが再現性のため追跡）
-- `.gitignore`（`mise.local.toml` を追記）
+- `.gitignore`（`mise.local.toml` ＋ `.mise.local.toml` を追記）
 - `.apm/instructions/development.instructions.md`（SoT 更新）
 - `.apm/instructions/apm.instructions.md`（SoT 更新）
 - `README.md`（開発節の更新）

@@ -288,13 +288,13 @@ local_deployed_files:
 - .github/instructions/widget.instructions.md
 - .github/instructions/workflow.instructions.md
 local_deployed_file_hashes:
-  .claude/rules/apm.md: sha256:5a939c5b955a8ef3bc9a12dfec50304f3c2b48db7e7ccda7e277f316ec81ce24
+  .claude/rules/apm.md: sha256:bba75e9dd70f2bc4fb6c5a0287b3df3016f0ae6e559724de2bbe24b7dfd412f8
   .claude/rules/architecture.md: sha256:4daadc3c79fd9523f49ea0dda79d2dc908ec797d06400c8fd4da1fa09706a713
-  .claude/rules/development.md: sha256:e723074100ab9449ed864edc3a2a1790f524c3b41fe54d84c68b8a66d057bd72
+  .claude/rules/development.md: sha256:f52fafb09999fc8965afd1f5548d0d6ca226c56aabd964ed71de214b99b626d6
   .claude/rules/widget.md: sha256:571da951219fba4961740815e63c5bbf48ab06daad1bd8dd8b18f2de258f8411
   .claude/rules/workflow.md: sha256:8f6716016cf1622b2c4f8cc5d562fdf88e2fa47c757b352374f1574e50a241e7
-  .github/instructions/apm.instructions.md: sha256:074536adbf586297179232bf1162d2d6f8adca58b27259ab59b6e5d12c25ca6e
+  .github/instructions/apm.instructions.md: sha256:487610c5119c5e47c783cf16d5cb25dbd5ff8088304f64a37f4e5f24d9415c7a
   .github/instructions/architecture.instructions.md: sha256:e4769d2844e43833abb445168f1598835802870f14b67182106aa9a1255ddb99
-  .github/instructions/development.instructions.md: sha256:2024c29e55c7d72dc70bb6c40efe419f061c63dffee3ca9eb79e1da287699f8c
+  .github/instructions/development.instructions.md: sha256:4f557bc853f76954e6dec5fbeded8bae59bb257e2519270097f380354e8638d1
   .github/instructions/widget.instructions.md: sha256:5b625c9df714cc12f66838cfa18d5e7aaefa1d9d17683b528eeefc78b39d76f8
   .github/instructions/workflow.instructions.md: sha256:e0e7f6c43a9d61a029e33be8f8f2e3f590995cddaa87831bd9e720d561040b21

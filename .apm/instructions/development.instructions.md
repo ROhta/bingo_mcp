@@ -7,16 +7,15 @@ applyTo: "**/{package.json,pnpm-lock.yaml,tsconfig*.json,*.ts}"
 
 ## 前提ツール
 
-- [Node.js](https://nodejs.org/)（`package.json` の `engines` 指定に従う） ＋ pnpm（`corepack enable`）
-- [uv](https://docs.astral.sh/uv/)（`uvx` 経由で serena / semgrep を起動）
-- [apm CLI](https://github.com/microsoft/apm)（AI エージェント設定の管理。`apm install` / `apm compile`）
+- [mise](https://mise.jdx.dev)（**node / pnpm / apm を管理**。バージョンは `mise.toml` で固定し `mise.lock` でチェックサム固定。`mise trust && mise install` で取得。tools を PATH に乗せるにはシェルで `mise activate` するか `mise exec -- <cmd>`）
+- [uv](https://docs.astral.sh/uv/)（`uvx` 経由で serena / semgrep を起動。mise 管理外）
 
 ## 環境構築
 
 ```bash
 git clone <repo> && cd bingo_mcp
 git submodule update --init        # vendor/bingo を取得
-corepack enable
+mise trust && mise install         # node / pnpm / apm を取得（mise.toml で固定）
 pnpm install --frozen-lockfile
 ```
 

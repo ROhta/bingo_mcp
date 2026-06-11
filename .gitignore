@@ -162,3 +162,7 @@ apm_modules/
 .claude/settings.json
 .github/prompts/
 .github/hooks/
+
+# mise の個人オーバーライド（共有しない）
+mise.local.toml
+.mise.local.toml

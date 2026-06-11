@@ -33,6 +33,8 @@ apm compile        # CLAUDE.md / AGENTS.md を更新
 
 `apm.lock.yaml` を除く生成物は `.gitignore` 対象のためコミットに含まれない。
 
+> apm CLI 自体は **mise 管理**（`mise.toml` の `github:microsoft/apm`、バージョン固定）。`mise install` で導入される。
+
 ## 依存パッケージ（`dependencies.apm`）
 
 扱える形態は 2 種類:

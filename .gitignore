@@ -147,8 +147,11 @@ vite.config.ts.timestamp-*
 CLAUDE.md
 AGENTS.md
 .claude/rules/
-# .github/instructions/ は生成物だが、クラウドの GitHub Copilot Code Review が読めるよう例外的に追跡する
-# (共通指示を apm-config/base へ移した後もクラウド経路にルールを届けるため)。
+# .github/instructions/ は生成物のため原則追跡しない。ただし共通指示 pr-review / language は
+# クラウドの GitHub Copilot Code Review に届けるため例外的に追跡する（第三者依存や重複生成物は対象外）。
+.github/instructions/*
+!.github/instructions/pr-review.instructions.md
+!.github/instructions/language.instructions.md
 # MCP 設定生成物 ＋ Codex プラグイン hooks（.codex/ はディレクトリ丸ごと: config.toml と hooks/ の両方）
 .mcp.json
 .vscode/mcp.json

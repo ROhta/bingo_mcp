@@ -1,11 +1,11 @@
 lockfile_version: '1'
-generated_at: '2026-07-03T07:25:27.999234+00:00'
+generated_at: '2026-07-03T08:39:25.045329+00:00'
 apm_version: 0.19.0
 dependencies:
 - repo_url: ROhta/apm-config
   host: github.com
   resolved_commit: 6db6099987990dbee05d8a34f00617467fb66d86
-  resolved_ref: main
+  resolved_ref: 6db6099987990dbee05d8a34f00617467fb66d86
   virtual_path: base
   is_virtual: true
   package_type: apm_package
@@ -23,7 +23,7 @@ dependencies:
 - repo_url: ROhta/apm-config
   host: github.com
   resolved_commit: 6db6099987990dbee05d8a34f00617467fb66d86
-  resolved_ref: main
+  resolved_ref: 6db6099987990dbee05d8a34f00617467fb66d86
   virtual_path: mcp-toolkit
   is_virtual: true
   package_type: apm_package
@@ -323,12 +323,12 @@ local_deployed_files:
 - .github/instructions/widget.instructions.md
 - .github/instructions/workflow.instructions.md
 local_deployed_file_hashes:
-  .claude/rules/apm.md: sha256:ced2a5c1e86bd18e2d296e85735759ac82935c935a86d98bed7b103e2173c769
+  .claude/rules/apm.md: sha256:05bd03c2a92fd06f4d399220e6d375c8e5221d4f775407689e47c608d8e36529
   .claude/rules/architecture.md: sha256:4daadc3c79fd9523f49ea0dda79d2dc908ec797d06400c8fd4da1fa09706a713
   .claude/rules/development.md: sha256:f52fafb09999fc8965afd1f5548d0d6ca226c56aabd964ed71de214b99b626d6
   .claude/rules/widget.md: sha256:571da951219fba4961740815e63c5bbf48ab06daad1bd8dd8b18f2de258f8411
   .claude/rules/workflow.md: sha256:cd469f9d934cbd70d997f36244b499e3623c7835481140c972f7b57cbb4dcaa8
-  .github/instructions/apm.instructions.md: sha256:b699aaa597693458c8438462a25ccc23d94441776d7fd4e5a5a4900d92e41885
+  .github/instructions/apm.instructions.md: sha256:74fbfec60f34c5eed2f206dd48788b00bd8d6384016853b488061ccf383d584c
   .github/instructions/architecture.instructions.md: sha256:e4769d2844e43833abb445168f1598835802870f14b67182106aa9a1255ddb99
   .github/instructions/development.instructions.md: sha256:4f557bc853f76954e6dec5fbeded8bae59bb257e2519270097f380354e8638d1
   .github/instructions/widget.instructions.md: sha256:5b625c9df714cc12f66838cfa18d5e7aaefa1d9d17683b528eeefc78b39d76f8

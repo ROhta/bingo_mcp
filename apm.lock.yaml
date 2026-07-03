@@ -1,7 +1,33 @@
 lockfile_version: '1'
-generated_at: '2026-06-10T20:14:02.295836+00:00'
+generated_at: '2026-07-03T07:25:27.999234+00:00'
 apm_version: 0.19.0
 dependencies:
+- repo_url: ROhta/apm-config
+  host: github.com
+  resolved_commit: 6db6099987990dbee05d8a34f00617467fb66d86
+  resolved_ref: main
+  virtual_path: base
+  is_virtual: true
+  package_type: apm_package
+  deployed_files:
+  - .claude/rules/language.md
+  - .claude/rules/pr-review.md
+  - .github/instructions/language.instructions.md
+  - .github/instructions/pr-review.instructions.md
+  deployed_file_hashes:
+    .claude/rules/language.md: sha256:ba3ab130598d94ac7e96e60a393f3d0fd9a00e69a3a6db7415690a53f5aea8ff
+    .claude/rules/pr-review.md: sha256:a641b7cf37e1d054e09509311d21f5ce3bdaf96ff238159a8650676740bc00e8
+    .github/instructions/language.instructions.md: sha256:18d17cabd53bf121ee02a80acfd67e071e5f3b5523d15f5c156f8a993e831092
+    .github/instructions/pr-review.instructions.md: sha256:245fe9b9e85f80e89b0872c985a45a96983032d12dd705a42ff7542f66fd244f
+  content_hash: sha256:1c25fd7fb561109e0f2809b5d0af0614f1bf9fdbf0091e783014d42004438986
+- repo_url: ROhta/apm-config
+  host: github.com
+  resolved_commit: 6db6099987990dbee05d8a34f00617467fb66d86
+  resolved_ref: main
+  virtual_path: mcp-toolkit
+  is_virtual: true
+  package_type: apm_package
+  content_hash: sha256:0346bf090250ac73e5d39f7ea6f32c0149313668c2ab8c9aab682cd32973e762
 - repo_url: github/awesome-copilot
   host: github.com
   resolved_commit: 5b049e4e196c10aab8ddfd9e492323d08cf985b0
@@ -247,16 +273,25 @@ dependencies:
     .github/hooks/superpowers-hooks.json: sha256:414b2cda93dfd4523ea183cc02c29b17b7c92bbfd54ad89acd83aadac042ea5a
   content_hash: sha256:fb4f87bfef928a6d68f5d5aaa29e3eba011961c5f03bbf171c3c348d8d161abb
 mcp_servers:
+- chrome-devtools
 - context7
 - semgrep
 - serena
 mcp_configs:
+  chrome-devtools:
+    name: chrome-devtools
+    transport: stdio
+    args:
+    - -y
+    - chrome-devtools-mcp@1.2.0
+    registry: false
+    command: npx
   context7:
     name: context7
     transport: stdio
     args:
     - -y
-    - '@upstash/context7-mcp'
+    - '@upstash/context7-mcp@3.2.0'
     registry: false
     command: npx
   semgrep:
@@ -271,7 +306,7 @@ mcp_configs:
     transport: stdio
     args:
     - --from
-    - git+https://github.com/oraios/serena@c3a8d5a9c54622c8ce771a54e5feffd6efda8749
+    - git+https://github.com/oraios/serena@acee002dc498e5f4c368eb9d45ab67e480d77832
     - serena
     - start-mcp-server
     registry: false
@@ -288,13 +323,13 @@ local_deployed_files:
 - .github/instructions/widget.instructions.md
 - .github/instructions/workflow.instructions.md
 local_deployed_file_hashes:
-  .claude/rules/apm.md: sha256:bba75e9dd70f2bc4fb6c5a0287b3df3016f0ae6e559724de2bbe24b7dfd412f8
+  .claude/rules/apm.md: sha256:ced2a5c1e86bd18e2d296e85735759ac82935c935a86d98bed7b103e2173c769
   .claude/rules/architecture.md: sha256:4daadc3c79fd9523f49ea0dda79d2dc908ec797d06400c8fd4da1fa09706a713
   .claude/rules/development.md: sha256:f52fafb09999fc8965afd1f5548d0d6ca226c56aabd964ed71de214b99b626d6
   .claude/rules/widget.md: sha256:571da951219fba4961740815e63c5bbf48ab06daad1bd8dd8b18f2de258f8411
-  .claude/rules/workflow.md: sha256:8f6716016cf1622b2c4f8cc5d562fdf88e2fa47c757b352374f1574e50a241e7
-  .github/instructions/apm.instructions.md: sha256:487610c5119c5e47c783cf16d5cb25dbd5ff8088304f64a37f4e5f24d9415c7a
+  .claude/rules/workflow.md: sha256:cd469f9d934cbd70d997f36244b499e3623c7835481140c972f7b57cbb4dcaa8
+  .github/instructions/apm.instructions.md: sha256:b699aaa597693458c8438462a25ccc23d94441776d7fd4e5a5a4900d92e41885
   .github/instructions/architecture.instructions.md: sha256:e4769d2844e43833abb445168f1598835802870f14b67182106aa9a1255ddb99
   .github/instructions/development.instructions.md: sha256:4f557bc853f76954e6dec5fbeded8bae59bb257e2519270097f380354e8638d1
   .github/instructions/widget.instructions.md: sha256:5b625c9df714cc12f66838cfa18d5e7aaefa1d9d17683b528eeefc78b39d76f8
-  .github/instructions/workflow.instructions.md: sha256:e0e7f6c43a9d61a029e33be8f8f2e3f590995cddaa87831bd9e720d561040b21
+  .github/instructions/workflow.instructions.md: sha256:16e5c9b60773fe298ad0176b2d5e20cd7a29428d9f5eac7f7695ff2fc1077d78

@@ -46,9 +46,7 @@ gh api graphql -f query='mutation($id:ID!){resolveReviewThread(input:{threadId:$
 
 ## PR レビュー時のコミュニケーション
 
-- いかなる場合でも日本語で記述する。
-- 指摘は GitHub の Suggestion 機能で修正コードを示す。
-- 何が課題かを文頭に書いてから詳細を説明する。
+レビューコメントの文章ルール（日本語・GitHub Suggestion 機能・課題を文頭に記述など）は共通パッケージ `ROhta/apm-config/base`（`pr-review.instructions.md`）に集約。生成物は `.github/instructions/pr-review.instructions.md` / `.claude/rules/pr-review.md`。
 
 ## GitHub 運用
 

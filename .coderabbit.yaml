@@ -1,0 +1,60 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit 設定。ドキュメント: https://docs.coderabbit.ai/getting-started/yaml-configuration
+language: "ja-JP"
+tone_instructions: "指摘は具体的に。該当箇所・理由・可能なら修正案を含める。PR 本文の「## 見てほしいところ」を最優先で確認する。"
+
+reviews:
+  profile: "assertive"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: true
+  review_status: true
+  auto_review:
+    enabled: true
+    drafts: false
+    ignore_usernames:
+      - "dependabot[bot]"
+  path_filters:
+    - "!**/node_modules/**"
+    - "!**/dist/**"
+    - "!**/apm_modules/**"
+    - "!vendor/**"
+    - "!pnpm-lock.yaml"
+    - "!apm.lock.yaml"
+    - "!mise.lock"
+  path_instructions:
+    - path: "src/server/**/*.ts"
+      instructions: |
+        - MCP サーバー実装。@tsconfig/strictest 準拠で、any や型アサーションの濫用を指摘する。
+        - MCP ツール定義（@modelcontextprotocol/sdk）と zod スキーマの整合性を確認する。
+        - 状態の検証境界（書き込みは厳格・読み取りは寛容）が保たれているか確認する。
+    - path: "src/widget/**/*.ts"
+      instructions: |
+        - MCP アプリのブラウザ widget。DOM / ブラウザ globals 前提のコードである点に注意する。
+        - サーバー状態のハイドレーション整合性と、描画ロジックの副作用に注意する。
+    - path: "src/shared/**/*.ts"
+      instructions: |
+        - server / widget 共有の型定義。isolatedDeclarations を壊さない型表現になっているか確認する。
+        - as const タプルなどの精密な型（長さ固定など）が崩れていないか確認する。
+    - path: "src/**/*.test.ts"
+      instructions: |
+        - vitest のテスト。テスト名が仕様を表現しているか、境界値・異常系がカバーされているか確認する。
+  tools:
+    eslint:
+      enabled: true
+    gitleaks:
+      enabled: true
+    markdownlint:
+      enabled: true
+    yamllint:
+      enabled: true
+
+knowledge_base:
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - ".apm/instructions/*.md"
+      - ".github/instructions/*.md"
+
+chat:
+  auto_reply: true

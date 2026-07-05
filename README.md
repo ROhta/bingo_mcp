@@ -6,15 +6,15 @@ bingo を MCP Apps で呼ぶ。チャットで「ビンゴやりたい」と言�
 
 ## ドキュメント
 
-プロジェクトに関する指示・設計（アーキテクチャ・乱数の公平性・状態検証境界・運用ルール）は AI エージェント向け指示と共通化し、[`.apm/instructions/`](.apm/instructions/) 配下に集約している。これらは [microsoft/apm](https://github.com/microsoft/apm)（Agent Package Manager）で管理され、`apm compile` で Claude Code / Codex / GitHub Copilot 向けファイル（`CLAUDE.md` / `AGENTS.md` / `.claude/rules/` / `.github/instructions/`）に展開される。
+このリポジトリ固有の指示・設計（アーキテクチャ・乱数の公平性・状態検証境界・widget ビルド）は AI エージェント向け指示と共通化し、[`.apm/instructions/`](.apm/instructions/) 配下に集約している。これらは [microsoft/apm](https://github.com/microsoft/apm)（Agent Package Manager）で管理され、`apm compile` で Claude Code / Codex / GitHub Copilot 向けファイル（`CLAUDE.md` / `AGENTS.md` / `.claude/rules/` / `.github/instructions/`）に展開される。
 
 | ファイル                                                         | 内容                                                                      |
 | ---------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| [`apm`](.apm/instructions/apm.instructions.md)                   | APM 運用ルール（SoT・追跡境界・MCP 依存・プラグイン）                     |
 | [`architecture`](.apm/instructions/architecture.instructions.md) | 責務分担・vendored 依存・乱数と公平性・状態検証境界・MCP ツール・状態権威 |
 | [`widget`](.apm/instructions/widget.instructions.md)             | widget の UI/ビルド（CSS・CSP・mp3 インライン・esbuild）                  |
 | [`development`](.apm/instructions/development.instructions.md)   | 環境構築・ビルド・lint・起動                                              |
-| [`workflow`](.apm/instructions/workflow.instructions.md)         | 開発フロー・AI ワークフロー・PR レビュー・GitHub 運用                     |
+
+他リポジトリ共通の指示（言語ルール・PR レビュー観点・開発 / ローカル AI ワークフロー・APM 運用ルール）は共通パッケージ [`ROhta/apm-config`](https://github.com/ROhta/apm-config) から `apm install` で配信され、ローカルの `.apm/instructions/` には保持しない。共通指示を変更したい場合は apm-config を編集する。共通 MCP サーバー（context7 / serena / deepwiki / chrome-devtools）も apm-config/mcp-toolkit から配信される。うち chrome-devtools は transitive なプラグイン参照のため、導入時は `apm install --trust-transitive-mcp` が必要（初回は解決のみで、2 回目の実行で設定が完了することがある）。
 
 ## 開発
 

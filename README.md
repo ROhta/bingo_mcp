@@ -14,18 +14,8 @@ bingo を MCP Apps で呼ぶ。チャットで「ビンゴやりたい」と言�
 | [`widget`](.apm/instructions/widget.instructions.md)             | widget の UI/ビルド（CSS・CSP・mp3 インライン・esbuild）                  |
 | [`development`](.apm/instructions/development.instructions.md)   | 環境構築・ビルド・lint・起動                                              |
 
-他リポジトリ共通の指示（言語ルール・PR レビュー観点・開発 / ローカル AI ワークフロー・APM 運用ルール）は共通パッケージ [`ROhta/apm-config`](https://github.com/ROhta/apm-config) から `apm install` で配信され、ローカルの `.apm/instructions/` には保持しない。共通指示を変更したい場合は apm-config を編集する。共通 MCP サーバー（context7 / serena / deepwiki / chrome-devtools）も apm-config/mcp-toolkit から配信される。うち chrome-devtools は transitive なプラグイン参照のため、導入時は `apm install --trust-transitive-mcp` が必要（初回は解決のみで、2 回目の実行で設定が完了することがある）。
+他リポジトリ共通の指示（言語ルール・PR レビュー観点・開発 / ローカル AI ワークフロー・APM 運用ルール）は共通パッケージ [`ROhta/apm-config`](https://github.com/ROhta/apm-config) から `apm install` で配信され、ローカルの `.apm/instructions/` には保持しない。共通指示を変更したい場合は apm-config を編集する。
 
-## 開発
+## MCP
 
-```sh
-git submodule update --init   # vendor/bingo を取得
-mise trust && mise install    # node / pnpm / apm を取得（mise.toml で固定）
-pnpm install --frozen-lockfile
-
-pnpm test       # vitest
-pnpm typecheck  # tsc --noEmit
-pnpm build      # widget(esbuild) → dist/mcp-app.html、server(tsc) → dist/server
-```
-
-詳細は [`.apm/instructions/development.instructions.md`](.apm/instructions/development.instructions.md) を参照。
+共通 MCP サーバー（context7 / serena / deepwiki / chrome-devtools）も apm-config/mcp-toolkit から配信される。うち chrome-devtools は transitive なプラグイン参照のため、導入時は `apm install --trust-transitive-mcp` が必要（初回は解決のみで、2 回目の実行で設定が完了することがある）。

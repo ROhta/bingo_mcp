@@ -1,8 +1,24 @@
 lockfile_version: '1'
-generated_at: '2026-07-05T21:36:21.639888+00:00'
-apm_version: 0.24.0
+generated_at: '2026-07-12T03:47:51.155444+00:00'
+apm_version: 0.24.1
 dependencies:
-- repo_url: ROhta/apm-config
+- repo_url: github/awesome-copilot
+  name: awesome-copilot-code-review-generic
+  host: github.com
+  resolved_commit: 5b049e4e196c10aab8ddfd9e492323d08cf985b0
+  resolved_ref: 5b049e4e196c10aab8ddfd9e492323d08cf985b0
+  version: 1.0.0
+  virtual_path: instructions/code-review-generic.instructions.md
+  is_virtual: true
+  package_type: apm_package
+  deployed_files:
+  - .claude/rules/code-review-generic.md
+  - .github/instructions/code-review-generic.instructions.md
+  deployed_file_hashes:
+    .claude/rules/code-review-generic.md: sha256:438a95faf5d7e0c1d52f0be55ca6d751a133a30f07cd95f09390803635267e5d
+    .github/instructions/code-review-generic.instructions.md: sha256:e6917309e3e986cde1650768cc871f54e5d054e90c4518afb5c937941ee212a9
+  content_hash: sha256:31212689590950d38ab751ad947ac94078ec57eb71a497c5b126135bc05dc7e1
+- repo_url: rohta/apm-config
   name: apm-config-base
   host: github.com
   resolved_commit: 319d9bf9958bdf07c9074daaffdafbbbbb7ebb22
@@ -39,7 +55,7 @@ dependencies:
     .github/instructions/pr-review.instructions.md: sha256:245fe9b9e85f80e89b0872c985a45a96983032d12dd705a42ff7542f66fd244f
   content_hash: sha256:3a79749375cbffd3ef2fdad2742076f1e42f99b3d1642f45501a587a8d72c9f8
   declared_license: GPL-3.0-or-later
-- repo_url: ROhta/apm-config
+- repo_url: rohta/apm-config
   name: apm-config-mcp-toolkit
   host: github.com
   resolved_commit: 319d9bf9958bdf07c9074daaffdafbbbbb7ebb22
@@ -56,30 +72,14 @@ dependencies:
     .github/instructions/mcp-servers.instructions.md: sha256:cdeddcff5d85e9a794f5cea2a8aa82d8ed2bbccac6121a1ccf6b81606d700fbd
   content_hash: sha256:393df665a96d4c97e75dd68072eb31ce5e38b27dbf618122b4484612e3603149
   declared_license: GPL-3.0-or-later
-- repo_url: github/awesome-copilot
-  name: awesome-copilot-code-review-generic
-  host: github.com
-  resolved_commit: 5b049e4e196c10aab8ddfd9e492323d08cf985b0
-  resolved_ref: 5b049e4e196c10aab8ddfd9e492323d08cf985b0
-  version: 1.0.0
-  virtual_path: instructions/code-review-generic.instructions.md
-  is_virtual: true
-  package_type: apm_package
-  deployed_files:
-  - .claude/rules/code-review-generic.md
-  - .github/instructions/code-review-generic.instructions.md
-  deployed_file_hashes:
-    .claude/rules/code-review-generic.md: sha256:438a95faf5d7e0c1d52f0be55ca6d751a133a30f07cd95f09390803635267e5d
-    .github/instructions/code-review-generic.instructions.md: sha256:e6917309e3e986cde1650768cc871f54e5d054e90c4518afb5c937941ee212a9
-  content_hash: sha256:31212689590950d38ab751ad947ac94078ec57eb71a497c5b126135bc05dc7e1
-- repo_url: ChromeDevTools/chrome-devtools-mcp
+- repo_url: chromedevtools/chrome-devtools-mcp
   name: chrome-devtools-mcp
   host: github.com
   resolved_commit: 913308263bdc8042af74924b68dc39a374ad071d
   resolved_ref: 913308263bdc8042af74924b68dc39a374ad071d
   version: 1.5.0
   depth: 2
-  resolved_by: ROhta/apm-config
+  resolved_by: rohta/apm-config
   package_type: marketplace_plugin
   deployed_files:
   - .agents/skills/a11y-debugging
@@ -163,7 +163,7 @@ dependencies:
   resolved_ref: d884ae04edebef577e82ff7c4e143debd0bbec99
   version: 6.1.1
   depth: 2
-  resolved_by: ROhta/apm-config
+  resolved_by: rohta/apm-config
   package_type: marketplace_plugin
   deployed_files:
   - .agents/skills/brainstorming
@@ -404,18 +404,10 @@ dependencies:
   content_hash: sha256:fcec2b6832dc4a4ce8fd0b7883fc72531fb402dd76537b62e495ab5c09742cf4
   declared_license: MIT
 mcp_servers:
-- chrome-devtools
 - context7
 - deepwiki
 - serena
 mcp_configs:
-  chrome-devtools:
-    name: chrome-devtools
-    transport: stdio
-    args:
-    - chrome-devtools-mcp@1.5.0
-    registry: false
-    command: npx
   context7:
     name: context7
     transport: stdio
@@ -439,6 +431,10 @@ mcp_configs:
     - start-mcp-server
     registry: false
     command: uvx
+mcp_config_provenance:
+  context7: apm-config-mcp-toolkit
+  deepwiki: apm-config-mcp-toolkit
+  serena: apm-config-mcp-toolkit
 local_deployed_files:
 - .claude/rules/architecture.md
 - .claude/rules/development.md

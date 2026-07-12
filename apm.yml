@@ -10,7 +10,13 @@ targets:
   - copilot
 includes: auto
 dependencies:
-  mcp: []
+  mcp:
+    - name: chrome-devtools
+      registry: false
+      transport: stdio
+      command: npx
+      args:
+        - chrome-devtools-mcp@1.5.0
   apm:
     - ROhta/apm-config/base#319d9bf9958bdf07c9074daaffdafbbbbb7ebb22
     - ROhta/apm-config/mcp-toolkit#319d9bf9958bdf07c9074daaffdafbbbbb7ebb22

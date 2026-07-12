@@ -1,5 +1,5 @@
 lockfile_version: '1'
-generated_at: '2026-07-12T04:17:04.034767+00:00'
+generated_at: '2026-07-12T07:28:13.600102+00:00'
 apm_version: 0.24.1
 dependencies:
 - repo_url: github/awesome-copilot
@@ -440,6 +440,7 @@ mcp_configs:
     registry: false
     command: uvx
 mcp_config_provenance:
+  chrome-devtools: chrome-devtools-mcp
   context7: apm-config-mcp-toolkit
   deepwiki: apm-config-mcp-toolkit
   serena: apm-config-mcp-toolkit

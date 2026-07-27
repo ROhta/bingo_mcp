@@ -12,6 +12,6 @@ includes: auto
 dependencies:
   mcp: []
   apm:
-    - ROhta/apm-config/base#5c49a6ffd591f9d6826784bfa5a97c09ce2e6e6f
-    - ROhta/apm-config/mcp-toolkit#5c49a6ffd591f9d6826784bfa5a97c09ce2e6e6f
+    - ROhta/apm-config/base#2f8120e88233ffb243071773bcdf8e31932e3ae3
+    - ROhta/apm-config/mcp-toolkit#2f8120e88233ffb243071773bcdf8e31932e3ae3
     - github/awesome-copilot/instructions/code-review-generic.instructions.md#83fe668a7c8a5eeed990af7b8e19bda8d73c120d

@@ -1,7 +1,13 @@
 [tools]
-node = "24.16.0"
-pnpm = "11.2.2"
-"github:microsoft/apm" = "0.24.1"
+# node 26 系は不可。Node 26 が globalThis.localStorage を組み込みアクセサとして定義し
+# （--localstorage-file 未指定時は undefined を返す）、vitest の jsdom 環境が注入する
+# localStorage を上書きできなくなるため、widget のテスト 6 件が
+# TypeError: Cannot read properties of undefined (reading 'clear') で落ちる。
+# 同一ツリーで node のみ切り替えて確認済み（26.5.0: 6 failed / 24.18.0: 32 passed）。
+# vitest / jsdom 側が対応したら 26 系へ引き上げること。
+node = "24.18.0"
+pnpm = "11.17.0"
+"github:microsoft/apm" = "0.26.0"
 
 [settings]
 lockfile = true

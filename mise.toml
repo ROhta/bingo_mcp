@@ -5,6 +5,8 @@
 # TypeError: Cannot read properties of undefined (reading 'clear') で落ちる。
 # 同一ツリーで node のみ切り替えて確認済み（26.5.0: 6 failed / 24.18.0: 32 passed）。
 # vitest / jsdom 側が対応したら 26 系へ引き上げること。
+# その際 package.json の @types/node も同じメジャーへ揃えること
+# （型が実行環境より新しいと tsc が Node 26 専用 API を許可し、24 で動く本番と乖離する）。
 node = "24.18.0"
 pnpm = "11.17.0"
 "github:microsoft/apm" = "0.26.0"

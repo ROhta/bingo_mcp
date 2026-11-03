@@ -5,7 +5,9 @@
 # package.json の @types/node は node と同じメジャーに揃えること
 # （型が実行環境より新しいと、tsc が実行環境にない API を許可してしまうため）。
 node = "26.13.0"
-pnpm = "11.28.0"
+# pnpm の lock は linux-arm64-musl を除く: 11.28.1 以降配布されない（起動時に segfault していたため。pnpm#10443）。
+#   mise lock pnpm -p linux-arm64,linux-x64,linux-x64-musl,macos-arm64,windows-x64
+pnpm = "11.28.10"
 "github:microsoft/apm" = "0.35.0"
 
 [settings]

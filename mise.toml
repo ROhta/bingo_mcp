@@ -5,7 +5,7 @@
 # package.json の @types/node は node と同じメジャーに揃えること
 # （型が実行環境より新しいと、tsc が実行環境にない API を許可してしまうため）。
 node = "26.13.0"
-pnpm = "11.28.10"
+pnpm = "11.28.0"
 "github:microsoft/apm" = "0.26.0"
 
 [settings]

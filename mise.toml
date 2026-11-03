@@ -6,7 +6,7 @@
 # （型が実行環境より新しいと、tsc が実行環境にない API を許可してしまうため）。
 node = "26.13.0"
 pnpm = "11.28.0"
-"github:microsoft/apm" = "0.26.0"
+"github:microsoft/apm" = "0.35.0"
 
 [settings]
 lockfile = true

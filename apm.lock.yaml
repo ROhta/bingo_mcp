@@ -1,6 +1,6 @@
 lockfile_version: '1'
-generated_at: '2026-07-27T10:08:57.709472+00:00'
-apm_version: 0.26.0
+generated_at: '2026-11-03T13:17:09.440251+00:00'
+apm_version: 0.35.0
 dependencies:
 - repo_url: github/awesome-copilot
   name: awesome-copilot-code-review-generic
@@ -19,6 +19,7 @@ dependencies:
     .github/instructions/code-review-generic.instructions.md: sha256:e6917309e3e986cde1650768cc871f54e5d054e90c4518afb5c937941ee212a9
   content_hash: sha256:31212689590950d38ab751ad947ac94078ec57eb71a497c5b126135bc05dc7e1
 - repo_url: rohta/apm-config
+  materialization_repo_url: ROhta/apm-config
   name: apm-config-base
   host: github.com
   resolved_commit: 2f8120e88233ffb243071773bcdf8e31932e3ae3
@@ -60,6 +61,7 @@ dependencies:
   content_hash: sha256:4a7ba8aa7a3e2207bf3724cd4a56026f233268bde5166a39f8b07589847e8232
   declared_license: GPL-3.0-or-later
 - repo_url: rohta/apm-config
+  materialization_repo_url: ROhta/apm-config
   name: apm-config-mcp-toolkit
   host: github.com
   resolved_commit: 2f8120e88233ffb243071773bcdf8e31932e3ae3
@@ -77,13 +79,14 @@ dependencies:
   content_hash: sha256:a1c44919095e9fef93a6414a6f0f1597757e711aa0722d2f6bf847f9140b71ff
   declared_license: GPL-3.0-or-later
 - repo_url: chromedevtools/chrome-devtools-mcp
+  materialization_repo_url: ChromeDevTools/chrome-devtools-mcp
   name: chrome-devtools-mcp
   host: github.com
   resolved_commit: f621d0052fd241dca76e7f615b20e9d320ba965f
   resolved_ref: f621d0052fd241dca76e7f615b20e9d320ba965f
   version: 1.6.0
   depth: 2
-  resolved_by: rohta/apm-config
+  resolved_by: ROhta/apm-config
   package_type: marketplace_plugin
   deployed_files:
   - .agents/skills/a11y-debugging
@@ -159,7 +162,7 @@ dependencies:
     .claude/skills/memory-leak-debugging/references/compare_snapshots.js: sha256:9de364f064b9b8c970b172e09c4be60a6cdc46e80060f9177b223ee3e8f2a781
     .claude/skills/memory-leak-debugging/references/memlab.md: sha256:048d3f1f733e036a0db513470cbbc22247884cf14e5b473f08977ba61b761b44
     .claude/skills/troubleshooting/SKILL.md: sha256:f7deca2af0ea0f6519b350a0fcb1e05d948228eac86f23d71ff3985508cf331f
-  content_hash: sha256:3b1151efc7ddf1d3bba9d56b3ccac3dadef18fc0f67c211765096a06904acdf3
+  content_hash: sha256:b3d8188debb6a7611b23f18faa052d9dcd4dd1cfd0b42c6738648854fc8fa8f3
 - repo_url: obra/superpowers
   name: superpowers
   host: github.com
@@ -167,7 +170,7 @@ dependencies:
   resolved_ref: 3dcbd5c4b48e02263fbf4a3c01e3fe4f81d584d9
   version: 6.2.0
   depth: 2
-  resolved_by: rohta/apm-config
+  resolved_by: ROhta/apm-config
   package_type: marketplace_plugin
   deployed_files:
   - .agents/skills/brainstorming
@@ -412,8 +415,8 @@ dependencies:
     .codex/hooks/superpowers/hooks/session-start: sha256:88a060272ca8047e0d1cd73a016e1cebba8396807a44be1e296d7c02dcbb9934
     .github/hooks/scripts/superpowers/hooks/run-hook.cmd: sha256:d3d9c6199678dab2858e60509dde5e7414f13c2a2b5e48a38b1d368b6e1d6abb
     .github/hooks/scripts/superpowers/hooks/session-start: sha256:88a060272ca8047e0d1cd73a016e1cebba8396807a44be1e296d7c02dcbb9934
-    .github/hooks/superpowers-hooks.json: sha256:4cbcc589100ece61bb49adff1b22c2a5265d3a2786dc6dba317f18a66dad34bf
-  content_hash: sha256:f4ba2a0b0275955535927e8635806758416f20b7dd7ff598c051cf5cdd08051d
+    .github/hooks/superpowers-hooks.json: sha256:af6432012a1b5a0b1644cf05d13acfac69c6671dbf12d0bf08cd8acc062d979d
+  content_hash: sha256:72f438a697b4f87e3162194b27aa4f0699f956a48415f9e5bd71856ad452f5d5
   declared_license: MIT
 deployments:
 - kind: project-relative
@@ -2116,7 +2119,7 @@ deployments:
   owners:
   - obra/superpowers
   active_owner: obra/superpowers
-  content_hash: sha256:4cbcc589100ece61bb49adff1b22c2a5265d3a2786dc6dba317f18a66dad34bf
+  content_hash: sha256:af6432012a1b5a0b1644cf05d13acfac69c6671dbf12d0bf08cd8acc062d979d
 - kind: project-relative
   target: copilot
   value: .github/instructions/apm-plugins.instructions.md
@@ -2233,7 +2236,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: null
+  content_hash: sha256:4d92d4819e82f156d22b9139469b508f627e2e6b176e6e179429320fc96c1c8d
 - kind: uri
   target: mcp
   value: context7
@@ -2242,7 +2245,16 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: null
+  content_hash: sha256:7a7df429c2f7af696a1018edf05d6a9c3f0d7449fc61683e8863987c44b85831
+- kind: uri
+  target: mcp
+  value: deepwiki
+  runtime: claude
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:249744af272808eed60999d85c397478f3a08562ea52a198923d8ced4d89d581
 - kind: uri
   target: mcp
   value: serena
@@ -2251,11 +2263,47 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: null
+  content_hash: sha256:4ce56da7a304e6f9b9cfae14966a9311d311fbb5c64bdb40700a938d0783831d
 - kind: uri
   target: mcp
   value: chrome-devtools
-  runtime: vscode
+  runtime: codex
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:5ea24e7f073146b93e02d631d4c8f741b897a8746dd5bbd7dd34fc096db95443
+- kind: uri
+  target: mcp
+  value: context7
+  runtime: codex
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:4470349537d1574f824f8321621828af77ee4d78261224f10d67779d769de64d
+- kind: uri
+  target: mcp
+  value: deepwiki
+  runtime: codex
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:506cdbe5d7b33a388dbfa8a37528c1bc5ad8b4750603eb6050b7dbea258e841a
+- kind: uri
+  target: mcp
+  value: serena
+  runtime: codex
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:8242a5f50375fdbadb328cfdf63249104bd70409f82f5e4b61f4df98120315e6
+- kind: uri
+  target: mcp
+  value: chrome-devtools
+  runtime: copilot
   scope: project
   owners:
   - .
@@ -2264,7 +2312,7 @@ deployments:
 - kind: uri
   target: mcp
   value: context7
-  runtime: vscode
+  runtime: copilot
   scope: project
   owners:
   - .
@@ -2273,7 +2321,7 @@ deployments:
 - kind: uri
   target: mcp
   value: deepwiki
-  runtime: vscode
+  runtime: copilot
   scope: project
   owners:
   - .
@@ -2282,7 +2330,7 @@ deployments:
 - kind: uri
   target: mcp
   value: serena
-  runtime: vscode
+  runtime: copilot
   scope: project
   owners:
   - .
@@ -2328,8 +2376,14 @@ mcp_target_servers:
   claude:
   - chrome-devtools
   - context7
+  - deepwiki
   - serena
-  vscode:
+  codex:
+  - chrome-devtools
+  - context7
+  - deepwiki
+  - serena
+  copilot:
   - chrome-devtools
   - context7
   - deepwiki
